@@ -138,16 +138,6 @@ class SidType(enum.Enum):
 
 
 @dataclasses.dataclass
-class TaskSchedulerTime:
-    """
-    A class containing datetime information about when a task will run
-    """
-
-    is_localized: bool
-    filetime: Optional[datetime.datetime]
-
-
-@dataclasses.dataclass
 class TaskSchedulerTimePeriod:
     """
     Class containing information delimiting time periods within scheduled tasks.
@@ -196,13 +186,13 @@ NULL = "\u0000"
 
 class _ScheduledTasksReader(io.BytesIO):
 
-    def read_task_scheduler_time(self) -> Optional[Tuple[bool, datetime.datetime]]:
-        is_localized = bool(self.read_aligned_u1())
+    def read_task_scheduler_time(self) -> Optional[datetime.datetime]:
+        _ = bool(self.read_aligned_u1())  # is_localized
         filetime = self.decode_filetime()
         if filetime is None:
             return None
 
-        return is_localized, filetime
+        return filetime
 
     def read_bool(self, aligned=False) -> Optional[bool]:
         try:
@@ -584,8 +574,8 @@ class _JobSchedule:
         reader.seek(4, io.SEEK_CUR)  # pad
 
         return cls(
-            start_boundary[1] if start_boundary is not None else None,
-            end_boundary[1] if end_boundary is not None else None,
+            start_boundary,
+            end_boundary,
             repetition_interval_secs,
             repetition_duration_secs,
             execution_time_limit_secs,
@@ -833,8 +823,8 @@ class TaskTrigger:
             reader.seek((8 - (reader.tell() - cur)) % 8, io.SEEK_CUR)  # pad to block
 
         return cls(
-            start_boundary[1] if start_boundary is not None else None,
-            end_boundary[1] if end_boundary is not None else None,
+            start_boundary,
+            end_boundary,
             repetition_interval_secs,
             trigger_enabled,
             trigger_type,
