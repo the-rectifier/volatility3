@@ -167,7 +167,7 @@ class Hidden_modules(interfaces.plugins.PluginInterface):
         mkobj_offset = vmlinux.get_type("module").relative_child_offset("mkobj")
         mod_offset = vmlinux.get_type("module_kobject").relative_child_offset("mod")
         offset_to_mkobj_mod = mkobj_offset + mod_offset
-        mod_member_template = vmlinux.get_type("module_kobject").vol.members["mod"][1]
+        mod_member_template = vmlinux.get_type("module_kobject").child_template("mod")
         mod_size = mod_member_template.size
         mod_member_data_format = mod_member_template.data_format
 
