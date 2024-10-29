@@ -4,7 +4,7 @@
 import logging
 from typing import List, Set, Tuple, Iterable
 from volatility3.framework import renderers, interfaces, exceptions, objects
-from volatility3.framework.constants.architectures import LINUX_ARCHS
+from volatility3.framework.constants import architectures
 from volatility3.framework.renderers import format_hints
 from volatility3.framework.configuration import requirements
 from volatility3.plugins.linux import lsmod
@@ -25,7 +25,7 @@ class Hidden_modules(interfaces.plugins.PluginInterface):
             requirements.ModuleRequirement(
                 name="kernel",
                 description="Linux kernel",
-                architectures=LINUX_ARCHS,
+                architectures=architectures.LINUX_ARCHS,
             ),
             requirements.PluginRequirement(
                 name="lsmod", plugin=lsmod.Lsmod, version=(2, 0, 0)
