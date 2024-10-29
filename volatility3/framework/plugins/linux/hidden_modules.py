@@ -232,6 +232,13 @@ class Hidden_modules(interfaces.plugins.PluginInterface):
             yield (0, fields)
 
     def run(self):
+        if self.context.symbol_space.verify_table_versions(
+            "dwarf2json", lambda version, _: (not version) or version < (0, 8, 0)
+        ):
+            raise exceptions.SymbolSpaceError(
+                "Invalid symbol table, please ensure the ISF table produced by dwarf2json was created with version 0.8.0 or later"
+            )
+
         headers = [
             ("Address", format_hints.Hex),
             ("Name", str),
