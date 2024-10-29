@@ -58,21 +58,10 @@ class Hidden_modules(interfaces.plugins.PluginInterface):
             modules_addr_max = vmlinux.object_from_symbol("module_addr_max")
 
             if isinstance(modules_addr_min, objects.Void):
-                # Crap ISF! Here's my best-effort workaround
-                vollog.warning(
-                    "Your ISF symbols are missing type information. You may need to update "
-                    "the ISF using the latest version of dwarf2json"
+                raise exceptions.VolatilityException(
+                    "Your ISF symbols lack type information. You may need to update the"
+                    "ISF using the latest version of dwarf2json"
                 )
-                # See issue #1041. In the Linux kernel these are "unsigned long"
-                for type_name in ("long unsigned int", "unsigned long"):
-                    if vmlinux.has_type(type_name):
-                        modules_addr_min = modules_addr_min.cast(type_name)
-                        modules_addr_max = modules_addr_max.cast(type_name)
-                        break
-                else:
-                    raise exceptions.VolatilityException(
-                        "Bad ISF! Please update the ISF using the latest version of dwarf2json"
-                    )
         else:
             raise exceptions.VolatilityException(
                 "Cannot find the module memory allocation area. Unsupported kernel"
