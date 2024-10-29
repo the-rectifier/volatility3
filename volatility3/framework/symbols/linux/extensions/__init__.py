@@ -502,10 +502,7 @@ class task_struct(generic.GenericIntelProcess):
 
             boottime += timekeeper.total_sleep_time
 
-            boottime.negate()
-            boottime.normalize()
-
-            return boottime
+            return boottime.negate()
 
         elif vmlinux.has_symbol("wall_to_monotonic"):
             # kernels < 3.4 - Tested on Debian7 3.2.0-4 (3.2.57-3+deb7u2)
@@ -523,10 +520,7 @@ class task_struct(generic.GenericIntelProcess):
                     # kernels < 2.6.32 total_sleep_time is an unsigned long as seconds
                     boottime.tv_sec += total_sleep_time
 
-            boottime.negate()
-            boottime.normalize()
-
-            return boottime
+            return boottime.negate()
 
         raise exceptions.VolatilityException("Unsupported")
 

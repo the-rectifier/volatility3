@@ -909,6 +909,7 @@ class TimespecVol3(object):
             tv_sec=self.tv_sec - timespec.tv_sec,
             tv_nsec=self.tv_nsec - timespec.tv_nsec,
         )
+
         result.normalize()
 
         return result
@@ -925,6 +926,13 @@ class TimespecVol3(object):
             self.tv_sec -= 1
 
     def negate(self):
-        """Negates the sign of both tv_sec and tv_nsec"""
-        self.tv_sec = -self.tv_sec
-        self.tv_nsec = -self.tv_nsec
+        """Returns a new TimespecVol3 object with the values of the current object negated"""
+
+        result = TimespecVol3(
+            tv_sec=-self.tv_sec,
+            tv_nsec=-self.tv_nsec,
+        )
+
+        result.normalize()
+
+        return result
