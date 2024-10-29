@@ -22,6 +22,7 @@ class LinuxKernelIntermedSymbols(intermed.IntermediateSymbolTable):
         # Set-up Linux specific types
         self.set_type_class("file", extensions.struct_file)
         self.set_type_class("list_head", extensions.list_head)
+        self.set_type_class("hlist_head", extensions.hlist_head)
         self.set_type_class("mm_struct", extensions.mm_struct)
         self.set_type_class("super_block", extensions.super_block)
         self.set_type_class("task_struct", extensions.task_struct)
@@ -53,6 +54,7 @@ class LinuxKernelIntermedSymbols(intermed.IntermediateSymbolTable):
         # Might not exist in older kernels or the current symbols
         self.optional_set_type_class("mount", extensions.mount)
         self.optional_set_type_class("mnt_namespace", extensions.mnt_namespace)
+        self.optional_set_type_class("rb_root", extensions.rb_root)
 
         # Network
         self.set_type_class("net", extensions.net)
@@ -206,7 +208,14 @@ class LinuxUtilities(interfaces.configuration.VersionableInterface):
                 pre_name = "pipe"
 
             elif sym == "simple_dname":
-                pre_name = cls._get_path_file(task, filp)
+                name = dentry.d_name.name
+                if name:
+                    pre_name = name.dereference().cast(
+                        "string", max_length=255, errors="replace"
+                    )
+                    return "/" + pre_name + " (deleted)"
+                else:
+                    pre_name = ""
 
             elif sym == "ns_dname":
                 # From Kernels 3.19
@@ -299,7 +308,7 @@ class LinuxUtilities(interfaces.configuration.VersionableInterface):
         task: interfaces.objects.ObjectInterface,
     ):
         # task.files can be null
-        if not task.files:
+        if not (task.files and task.files.is_readable()):
             return None
 
         fd_table = task.files.get_fds()
@@ -319,7 +328,7 @@ class LinuxUtilities(interfaces.configuration.VersionableInterface):
         )
 
         for fd_num, filp in enumerate(fds):
-            if filp != 0:
+            if filp and filp.is_readable():
                 full_path = LinuxUtilities.path_for_file(context, task, filp)
 
                 yield fd_num, filp, full_path

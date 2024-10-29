@@ -58,7 +58,7 @@ class Volshell(interfaces.plugins.PluginInterface):
         ]
 
     def run(
-        self, additional_locals: Dict[str, Any] = None
+        self, additional_locals: Dict[str, Any] = {}
     ) -> interfaces.renderers.TreeGrid:
         """Runs the interactive volshell plugin.
 
@@ -94,7 +94,10 @@ class Volshell(interfaces.plugins.PluginInterface):
 """
 
         sys.ps1 = f"({self.current_layer}) >>> "
-        self.__console = code.InteractiveConsole(locals=self._construct_locals_dict())
+        # Dict self._construct_locals_dict() will have priority on keys
+        combined_locals = additional_locals.copy()
+        combined_locals.update(self._construct_locals_dict())
+        self.__console = code.InteractiveConsole(locals=combined_locals)
         # Since we have to do work to add the option only once for all different modes of volshell, we can't
         # rely on the default having been set
         if self.config.get("script", None) is not None:
@@ -112,7 +115,7 @@ class Volshell(interfaces.plugins.PluginInterface):
 
         variables = []
         print("\nMethods:")
-        for aliases, item in self.construct_locals():
+        for aliases, item in sorted(self.construct_locals()):
             name = ", ".join(aliases)
             if item.__doc__ and callable(item):
                 print(f"* {name}")
@@ -125,8 +128,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             print(f"  {var}")
 
     def construct_locals(self) -> List[Tuple[List[str], Any]]:
-        """Returns a dictionary listing the functions to be added to the
-        environment."""
+        """Returns a listing of the functions to be added to the environment."""
         return [
             (["dt", "display_type"], self.display_type),
             (["db", "display_bytes"], self.display_bytes),
@@ -529,7 +531,7 @@ class Volshell(interfaces.plugins.PluginInterface):
                 val, interfaces.configuration.BasicTypes
             ) and not isinstance(val, list):
                 if not isinstance(val, list) or all(
-                    [isinstance(x, interfaces.configuration.BasicTypes) for x in val]
+                    isinstance(x, interfaces.configuration.BasicTypes) for x in val
                 ):
                     raise TypeError(
                         "Configurable values must be simple types (int, bool, str, bytes)"

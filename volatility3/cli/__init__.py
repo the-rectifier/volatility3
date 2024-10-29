@@ -235,17 +235,34 @@ class CommandLine:
             default=constants.CACHE_PATH,
             type=str,
         )
-        parser.add_argument(
+        isf_group = parser.add_mutually_exclusive_group()
+        isf_group.add_argument(
             "--offline",
             help="Do not search online for additional JSON files",
             default=False,
             action="store_true",
+        )
+        isf_group.add_argument(
+            "-u",
+            "--remote-isf-url",
+            metavar="URL",
+            help="Search online for ISF json files",
+            default=constants.REMOTE_ISF_URL,
+            type=str,
         )
         parser.add_argument(
             "--filters",
             help="List of filters to apply to the output (in the form of [+-]columname,pattern[!])",
             default=[],
             action="append",
+        )
+        parser.add_argument(
+            "--hide-columns",
+            help="Case-insensitive space separated list of prefixes to determine which columns to hide in the output if provided",
+            default=None,
+            action="extend",
+            nargs="*",
+            type=str,
         )
 
         parser.set_defaults(**default_config)
@@ -313,6 +330,8 @@ class CommandLine:
 
         if partial_args.offline:
             constants.OFFLINE = partial_args.offline
+        elif partial_args.remote_isf_url:
+            constants.REMOTE_ISF_URL = partial_args.remote_isf_url
 
         # Do the initialization
         ctx = contexts.Context()  # Construct a blank context
@@ -477,6 +496,7 @@ class CommandLine:
                 grid = constructed.run()
                 renderer = renderers[args.renderer]()
                 renderer.filter = text_filter.CLIFilter(grid, args.filters)
+                renderer.column_hide_list = args.hide_columns
                 renderer.render(grid)
         except exceptions.VolatilityException as excp:
             self.process_exceptions(excp)
@@ -604,6 +624,10 @@ class CommandLine:
             caused_by = [
                 "A required python module is not installed (install the module and re-run)"
             ]
+        elif isinstance(excp, exceptions.RenderException):
+            general = "Volatility experienced an issue when rendering the output:"
+            detail = f"{excp}"
+            caused_by = ["An invalid renderer option, such as no visible columns"]
         else:
             general = "Volatility encountered an unexpected situation."
             detail = ""
