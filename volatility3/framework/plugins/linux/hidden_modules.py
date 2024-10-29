@@ -48,10 +48,12 @@ class Hidden_modules(interfaces.plugins.PluginInterface):
         """
         vmlinux = context.modules[vmlinux_module_name]
         if vmlinux.has_symbol("mod_tree"):
+            # Kernel >= 5.19    58d208de3e8d87dbe196caf0b57cc58c7a3836ca
             mod_tree = vmlinux.object_from_symbol("mod_tree")
             modules_addr_min = mod_tree.addr_min
             modules_addr_max = mod_tree.addr_max
         elif vmlinux.has_symbol("module_addr_min"):
+            # 2.6.27 <= kernel < 5.19   3a642e99babe0617febb6f402e1e063479f489db
             modules_addr_min = vmlinux.object_from_symbol("module_addr_min")
             modules_addr_max = vmlinux.object_from_symbol("module_addr_max")
 
