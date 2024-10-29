@@ -903,7 +903,7 @@ class TimespecVol3(object):
         """Returns a new TimespecVol3 object that subtracts the values in the timespec
         argument from the current object's values"""
         if not isinstance(timespec, (TimespecVol3, extensions.timespec64)):
-            raise TypeError("Cannot add a TimespecVol3 to this object")
+            raise TypeError("Cannot substract this object to a TimespecVol3")
 
         result = TimespecVol3(
             tv_sec=self.tv_sec - timespec.tv_sec,
