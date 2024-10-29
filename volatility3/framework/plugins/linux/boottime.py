@@ -88,7 +88,7 @@ class Boottime(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface)
         ):
             description = f"System boot time for time namespace {time_namespace_id}"
 
-            yield description, timeliner.TimeLinerType.BOOTTIME, boottime
+            yield description, timeliner.TimeLinerType.CREATED, boottime
 
     def run(self):
         columns = [

@@ -23,7 +23,6 @@ class TimeLinerType(enum.IntEnum):
     MODIFIED = 2
     ACCESSED = 3
     CHANGED = 4
-    BOOTTIME = 5
 
 
 class TimeLinerInterface(metaclass=abc.ABCMeta):
@@ -172,10 +171,6 @@ class Timeliner(interfaces.plugins.PluginInterface):
                                     TimeLinerType.CHANGED,
                                     renderers.NotApplicableValue(),
                                 ),
-                                times.get(
-                                    TimeLinerType.BOOTTIME,
-                                    renderers.NotApplicableValue(),
-                                ),
                             ],
                         )
                     )
@@ -183,11 +178,11 @@ class Timeliner(interfaces.plugins.PluginInterface):
                     # Write each entry because the body file doesn't need to be sorted
                     if fp:
                         times = self.timeline[(plugin_name, item)]
-                        # Body format is: MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime|boottime
+                        # Body format is: MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime
 
                         if self._any_time_present(times):
                             fp.write(
-                                "|{} - {}|0|0|0|0|0|{}|{}|{}|{}|{}\n".format(
+                                "|{} - {}|0|0|0|0|0|{}|{}|{}|{}\n".format(
                                     plugin_name,
                                     self._sanitize_body_format(item),
                                     self._text_format(
@@ -201,9 +196,6 @@ class Timeliner(interfaces.plugins.PluginInterface):
                                     ),
                                     self._text_format(
                                         times.get(TimeLinerType.CREATED, "0")
-                                    ),
-                                    self._text_format(
-                                        times.get(TimeLinerType.BOOTTIME, "0")
                                     ),
                                 )
                             )
@@ -328,7 +320,6 @@ class Timeliner(interfaces.plugins.PluginInterface):
                 ("Modified Date", datetime.datetime),
                 ("Accessed Date", datetime.datetime),
                 ("Changed Date", datetime.datetime),
-                ("Boot Date", datetime.datetime),
             ],
             generator=self._generator(plugins_to_run),
         )
