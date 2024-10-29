@@ -18,7 +18,7 @@ from volatility3.framework.constants.linux import IP_PROTOCOLS, IPV6_PROTOCOLS
 from volatility3.framework.constants.linux import TCP_STATES, NETLINK_PROTOCOLS
 from volatility3.framework.constants.linux import ETH_PROTOCOLS, BLUETOOTH_STATES
 from volatility3.framework.constants.linux import BLUETOOTH_PROTOCOLS, SOCKET_STATES
-from volatility3.framework.constants.linux import CAPABILITIES
+from volatility3.framework.constants.linux import CAPABILITIES, PT_FLAGS
 from volatility3.framework.layers import linear
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
@@ -381,6 +381,41 @@ class task_struct(generic.GenericIntelProcess):
             if task.vol.offset not in threads_seen:
                 threads_seen.add(task.vol.offset)
                 yield task
+
+    @property
+    def is_being_ptraced(self) -> bool:
+        """Returns True if this task is being traced using ptrace"""
+        return self.ptrace != 0
+
+    @property
+    def is_ptracing(self) -> bool:
+        """Returns True if this task is tracing other tasks using ptrace"""
+        is_tracing = (
+            self.ptraced.next.is_readable()
+            and self.ptraced.next.dereference().vol.offset != self.ptraced.vol.offset
+        )
+        return is_tracing
+
+    def get_ptrace_tracer_tid(self) -> Optional[int]:
+        """Returns the tracer's TID tracing this task"""
+        return self.parent.pid if self.is_being_ptraced else None
+
+    def get_ptrace_tracee_tids(self) -> List[int]:
+        """Returns the list of TIDs being traced by this task"""
+        task_symbol_table_name = self.get_symbol_table_name()
+
+        task_struct_symname = f"{task_symbol_table_name}{constants.BANG}task_struct"
+        tracing_tid_list = [
+            task_being_traced.pid
+            for task_being_traced in self.ptraced.to_list(
+                task_struct_symname, "ptrace_entry"
+            )
+        ]
+        return tracing_tid_list
+
+    def get_ptrace_tracee_flags(self) -> Optional[str]:
+        """Returns a string with the ptrace flags"""
+        return PT_FLAGS(self.ptrace).flags if self.is_being_ptraced else None
 
     def _get_task_start_time(self) -> datetime.timedelta:
         """Returns the task's monotonic start_time as a timedelta.
@@ -1043,7 +1078,7 @@ class dentry(objects.StructType):
         if self.has_member("d_sib") and self.has_member("d_children"):
             # kernels >= 6.8
             walk_member = "d_sib"
-            list_head_member = self.d_children.first
+            list_head_member = self.d_children
         elif self.has_member("d_child") and self.has_member("d_subdirs"):
             # 2.5.0 <= kernels < 6.8
             walk_member = "d_child"
@@ -1158,6 +1193,40 @@ class list_head(objects.StructType, collections.abc.Iterable):
 
     def __iter__(self) -> Iterator[interfaces.objects.ObjectInterface]:
         return self.to_list(self.vol.parent.vol.type_name, self.vol.member_name)
+
+
+class hlist_head(objects.StructType):
+    def to_list(
+        self,
+        symbol_type: str,
+        member: str,
+    ) -> Iterator[interfaces.objects.ObjectInterface]:
+        """Returns an iterator of the entries in the list.
+
+        This is a doubly linked list; however, it is not circular, so the 'forward' field
+        doesn't make sense. Also, the sentinel concept doesn't make sense here either;
+        unlike list_head, the head and nodes each have their own distinct types. A list_head
+        cannot be a node by itself.
+        - The 'pprev' of the first 'hlist_node' points to the 'hlist_head', not to the last node.
+        - The last element 'next' member is NULL
+
+        Args:
+            symbol_type: Type of the list elements
+            member: Name of the list_head member in the list elements
+
+        Yields:
+            Objects of the type specified via the "symbol_type" argument.
+
+        """
+        vmlinux = linux.LinuxUtilities.get_module_from_volobj_type(self._context, self)
+
+        current = self.first
+        while current and current.is_readable():
+            yield linux.LinuxUtilities.container_of(
+                current, symbol_type, member, vmlinux
+            )
+
+            current = current.next
 
 
 class files_struct(objects.StructType):
@@ -1565,14 +1634,42 @@ class mnt_namespace(objects.StructType):
         else:
             raise AttributeError("Unable to find mnt_namespace inode")
 
-    def get_mount_points(self):
+    def get_mount_points(
+        self,
+    ) -> Iterator[interfaces.objects.ObjectInterface]:
+        """Yields the mount points for this mount namespace.
+
+        Yields:
+            mount struct instances
+        """
         table_name = self.vol.type_name.split(constants.BANG)[0]
-        mnt_type = table_name + constants.BANG + "mount"
-        if not self._context.symbol_space.has_type(mnt_type):
-            # Old kernels ~ 2.6
-            mnt_type = table_name + constants.BANG + "vfsmount"
-        for mount in self.list.to_list(mnt_type, "mnt_list"):
-            yield mount
+
+        if self.has_member("list"):
+            # kernels < 6.8
+            mnt_type = table_name + constants.BANG + "mount"
+            if not self._context.symbol_space.has_type(mnt_type):
+                # In kernels < 3.3, the 'mount' struct didn't exist, and the 'mnt_list'
+                # member was part of the 'vfsmount' struct.
+                mnt_type = table_name + constants.BANG + "vfsmount"
+
+            yield from self.list.to_list(mnt_type, "mnt_list")
+        elif (
+            self.has_member("mounts")
+            and self.mounts.vol.type_name == table_name + constants.BANG + "rb_root"
+        ):
+            # kernels >= 6.8
+            vmlinux = linux.LinuxUtilities.get_module_from_volobj_type(
+                self._context, self
+            )
+            for node in self.mounts.get_nodes():
+                mnt = linux.LinuxUtilities.container_of(
+                    node, "mount", "mnt_list", vmlinux
+                )
+                yield mnt
+        else:
+            raise exceptions.VolatilityException(
+                "Unsupported kernel mount namespace implementation"
+            )
 
 
 class net(objects.StructType):
@@ -2449,3 +2546,31 @@ class IDR(objects.StructType):
 
         for page_addr in get_entries_func():
             yield page_addr
+
+
+class rb_root(objects.StructType):
+    def _walk_nodes(self, root_node) -> Iterator[int]:
+        """Traverses the Red-Black tree from the root node and yields a pointer to each
+        node in this tree.
+
+        Args:
+            root_node: A Red-Black tree node from which to start descending
+
+        Yields:
+            A pointer to every node descending from the specified root node
+        """
+        if not root_node:
+            return
+
+        yield root_node
+        yield from self._walk_nodes(root_node.rb_left)
+        yield from self._walk_nodes(root_node.rb_right)
+
+    def get_nodes(self) -> Iterator[int]:
+        """Yields a pointer to each node in the Red-Black tree
+
+        Yields:
+            A pointer to every node in the Red-Black tree
+        """
+
+        yield from self._walk_nodes(root_node=self.rb_node)
