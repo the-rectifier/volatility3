@@ -1299,7 +1299,7 @@ class vfsmount(objects.StructType):
             bool: 'True' if the given argument points to the the same 'vfsmount'
             as 'self'.
         """
-        if type(vfsmount_ptr) == objects.Pointer:
+        if isinstance(vfsmount_ptr, objects.Pointer):
             return self.vol.offset == vfsmount_ptr
         else:
             raise exceptions.VolatilityException(
