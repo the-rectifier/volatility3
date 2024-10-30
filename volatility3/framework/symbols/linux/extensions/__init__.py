@@ -2244,6 +2244,18 @@ class Timespec64Abstract(abc.ABC):
 
         result.normalize()
 
+        return self + other.negate()
+
+    def negate(self):
+        """Returns a new Timespec64Concrete object with the values of the current object negated"""
+        # pylint: disable=E1101
+        result = Timespec64Concrete(
+            tv_sec=-self.tv_sec,
+            tv_nsec=-self.tv_nsec,
+        )
+
+        result.normalize()
+
         return result
 
     def normalize(self):
@@ -2258,18 +2270,6 @@ class Timespec64Abstract(abc.ABC):
         while self.tv_nsec < 0:
             self.tv_nsec += NSEC_PER_SEC
             self.tv_sec -= 1
-
-    def negate(self):
-        """Returns a new Timespec64Concrete object with the values of the current object negated"""
-        # pylint: disable=E1101
-        result = Timespec64Concrete(
-            tv_sec=-self.tv_sec,
-            tv_nsec=-self.tv_nsec,
-        )
-
-        result.normalize()
-
-        return result
 
 
 class Timespec64Concrete(Timespec64Abstract):
