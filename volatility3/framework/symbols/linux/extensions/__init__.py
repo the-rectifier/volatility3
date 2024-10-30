@@ -2,6 +2,7 @@
 # which is available at https://www.volatilityfoundation.org/license/vsl-v1.0
 #
 
+import abc
 import collections.abc
 import logging
 import functools
@@ -18,11 +19,12 @@ from volatility3.framework.constants.linux import IP_PROTOCOLS, IPV6_PROTOCOLS
 from volatility3.framework.constants.linux import TCP_STATES, NETLINK_PROTOCOLS
 from volatility3.framework.constants.linux import ETH_PROTOCOLS, BLUETOOTH_STATES
 from volatility3.framework.constants.linux import BLUETOOTH_PROTOCOLS, SOCKET_STATES
-from volatility3.framework.constants.linux import CAPABILITIES, PT_FLAGS
+from volatility3.framework.constants.linux import CAPABILITIES, PT_FLAGS, NSEC_PER_SEC
 from volatility3.framework.layers import linear
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
 from volatility3.framework.symbols.linux.extensions import elf
+
 
 vollog = logging.getLogger(__name__)
 
@@ -431,10 +433,10 @@ class task_struct(generic.GenericIntelProcess):
                 if start_time_obj_type_name != "timespec":
                     # kernels >= 3.17 real_start_time and start_time are u64
                     # kernels >= 5.5 uses start_boottime which is also a u64
-                    start_time = linux.TimespecVol3.new_from_nsec(start_time_obj)
+                    start_time = Timespec64Concrete.new_from_nsec(start_time_obj)
                 else:
                     # kernels < 3.17 real_start_time and start_time are timespec
-                    start_time = linux.TimespecVol3.new_from_timespec(start_time_obj)
+                    start_time = Timespec64Concrete.new_from_timespec(start_time_obj)
 
                 # This is relative to the boot time so it makes sense to be a timedelta.
                 return start_time.to_timedelta()
@@ -508,8 +510,8 @@ class task_struct(generic.GenericIntelProcess):
 
         return time_namespace_offsets.boottime
 
-    def _get_boottime_raw(self) -> "linux.TimespecVol3":
-        """Returns the boot time in a TimespecVol3."""
+    def _get_boottime_raw(self) -> "Timespec64Concrete":
+        """Returns the boot time in a Timespec64Concrete object."""
 
         vmlinux = linux.LinuxUtilities.get_module_from_volobj_type(self._context, self)
         if vmlinux.has_symbol("tk_core"):
@@ -522,7 +524,7 @@ class task_struct(generic.GenericIntelProcess):
             else:
                 # 3.17 <= kernels < 4.10 - Tested on Ubuntu 4.4.0-142
                 boottime_nsec = timekeeper.offs_real.tv64 - timekeeper.offs_boot.tv64
-            return linux.TimespecVol3.new_from_nsec(boottime_nsec)
+            return Timespec64Concrete.new_from_nsec(boottime_nsec)
 
         elif vmlinux.has_symbol("timekeeper") and vmlinux.get_type(
             "timekeeper"
@@ -531,7 +533,7 @@ class task_struct(generic.GenericIntelProcess):
             timekeeper = vmlinux.object_from_symbol("timekeeper")
 
             # timekeeper.wall_to_monotonic is timespec
-            boottime = linux.TimespecVol3.new_from_timespec(
+            boottime = Timespec64Concrete.new_from_timespec(
                 timekeeper.wall_to_monotonic
             )
 
@@ -542,7 +544,7 @@ class task_struct(generic.GenericIntelProcess):
         elif vmlinux.has_symbol("wall_to_monotonic"):
             # kernels < 3.4 - Tested on Debian7 3.2.0-4 (3.2.57-3+deb7u2)
             wall_to_monotonic = vmlinux.object_from_symbol("wall_to_monotonic")
-            boottime = linux.TimespecVol3.new_from_timespec(wall_to_monotonic)
+            boottime = Timespec64Concrete.new_from_timespec(wall_to_monotonic)
             if vmlinux.has_symbol("total_sleep_time"):
                 # 2.6.23 <= kernels < 3.4 7c3f1a573237b90ef331267260358a0ec4ac9079
                 total_sleep_time = vmlinux.object_from_symbol("total_sleep_time")
@@ -2168,12 +2170,124 @@ class kernel_cap_t(kernel_cap_struct):
         return cap_value & self.get_kernel_cap_full()
 
 
-class timespec64(objects.StructType):
-    def to_datetime(self) -> datetime.datetime:
-        """Returns the respective aware datetime"""
+class Timespec64Abstract(abc.ABC):
+    """Abstract class to handle all required timespec64 operations, convertions and
+    adjustments."""
 
-        dt = conversion.unixtime_to_datetime(self.tv_sec + self.tv_nsec / 1e9)
-        return dt
+    @classmethod
+    def new_from_timespec(cls, other) -> "Timespec64Concrete":
+        """Creates a new instance from an Timespec64Abstract subclass object"""
+        if not isinstance(other, Timespec64Abstract):
+            raise TypeError("Requires an object subclass of Timespec64Abstract")
+
+        tv_sec = int(other.tv_sec)
+        tv_nsec = int(other.tv_nsec)
+        return Timespec64Concrete(tv_sec=tv_sec, tv_nsec=tv_nsec)
+
+    @classmethod
+    def new_from_nsec(cls, nsec) -> "Timespec64Concrete":
+        """Creates a new instance from an integer in nanoseconds"""
+
+        # Based on ns_to_timespec64()
+        if nsec > 0:
+            tv_sec = nsec // NSEC_PER_SEC
+            tv_nsec = nsec % NSEC_PER_SEC
+        elif nsec < 0:
+            tv_sec = -((-nsec - 1) // NSEC_PER_SEC) - 1
+            rem = (-nsec - 1) % NSEC_PER_SEC
+            tv_nsec = NSEC_PER_SEC - rem - 1
+        else:
+            tv_sec = tv_nsec = 0
+
+        return Timespec64Concrete(tv_sec=tv_sec, tv_nsec=tv_nsec)
+
+    def to_datetime(self) -> datetime.datetime:
+        """Converts this Timespec64Abstract subclass object to a UTC aware datetime"""
+
+        # pylint: disable=E1101
+        return conversion.unixtime_to_datetime(
+            self.tv_sec + self.tv_nsec / NSEC_PER_SEC
+        )
+
+    def to_timedelta(self) -> datetime.timedelta:
+        """Converts this Timespec64Abstract subclass object to timedelta"""
+        # pylint: disable=E1101
+        return datetime.timedelta(seconds=self.tv_sec + self.tv_nsec / NSEC_PER_SEC)
+
+    def __add__(self, other) -> "Timespec64Concrete":
+        """Returns a new Timespec64Concrete object that sums the current values with those
+        in the timespec argument"""
+        if not isinstance(other, Timespec64Abstract):
+            raise TypeError("Requires an object subclass of Timespec64Abstract")
+
+        # pylint: disable=E1101
+        result = Timespec64Concrete(
+            tv_sec=self.tv_sec + other.tv_sec,
+            tv_nsec=self.tv_nsec + other.tv_nsec,
+        )
+
+        result.normalize()
+
+        return result
+
+    def __sub__(self, other) -> "Timespec64Concrete":
+        """Returns a new Timespec64Abstract object that subtracts the values in the timespec
+        argument from the current object's values"""
+        if not isinstance(other, Timespec64Abstract):
+            raise TypeError("Requires an object subclass of Timespec64Abstract")
+
+        # pylint: disable=E1101
+        result = Timespec64Concrete(
+            tv_sec=self.tv_sec - other.tv_sec,
+            tv_nsec=self.tv_nsec - other.tv_nsec,
+        )
+
+        result.normalize()
+
+        return result
+
+    def normalize(self):
+        """Normalize any overflow in tv_sec and tv_nsec."""
+        # Based on kernel's set_normalized_timespec64()
+
+        # pylint: disable=E1101
+        while self.tv_nsec >= NSEC_PER_SEC:
+            self.tv_nsec -= NSEC_PER_SEC
+            self.tv_sec += 1
+
+        while self.tv_nsec < 0:
+            self.tv_nsec += NSEC_PER_SEC
+            self.tv_sec -= 1
+
+    def negate(self):
+        """Returns a new Timespec64Concrete object with the values of the current object negated"""
+        # pylint: disable=E1101
+        result = Timespec64Concrete(
+            tv_sec=-self.tv_sec,
+            tv_nsec=-self.tv_nsec,
+        )
+
+        result.normalize()
+
+        return result
+
+
+class Timespec64Concrete(Timespec64Abstract):
+    """Handle all required timespec64 operations, convertions and adjustments.
+    This is used to dynamically create timespec64-like objects, each its own variables
+    and the same methods as a timespec64 object extension.
+    """
+
+    def __init__(self, tv_sec=0, tv_nsec=0):
+        self.tv_sec = tv_sec
+        self.tv_nsec = tv_nsec
+
+
+class timespec64(Timespec64Abstract, objects.StructType):
+    """Handle all required timespec64 operations, convertions and adjustments.
+    This works as an extension of the timespec64 object while maintaining the same methods
+    as a Timespec64Concrete object.
+    """
 
 
 class inode(objects.StructType):
