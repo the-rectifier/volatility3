@@ -339,3 +339,11 @@ class PT_FLAGS(Flag):
     def flags(self) -> str:
         """Returns the ptrace flags string"""
         return str(self).replace(self.__class__.__name__ + ".", "")
+
+
+# Valid sizes for modules. Note that the Linux kernel does not define these values; they
+# are based on empirical observations of typical memory allocations for kernel modules.
+# We use this to verify that the found module falls within reasonable limits.
+MODULE_MAXIMUM_CORE_SIZE = 20000000
+MODULE_MAXIMUM_CORE_TEXT_SIZE = 20000000
+MODULE_MINIMUM_SIZE = 4096
