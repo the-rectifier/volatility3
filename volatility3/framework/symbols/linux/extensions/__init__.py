@@ -32,7 +32,7 @@ vollog = logging.getLogger(__name__)
 class module(generic.GenericIntelProcess):
 
     @functools.cached_property
-    def mod_mem_type(self):
+    def mod_mem_type(self) -> Dict:
         """Return the mod_mem_type enum choices if available or an empty dict if not"""
         # mod_mem_type and module_memory were added in kernel 6.4 which replaces
         # module_layout for storing the information around core_layout etc.
