@@ -2236,17 +2236,9 @@ class Timespec64Abstract(abc.ABC):
         if not isinstance(other, Timespec64Abstract):
             raise TypeError("Requires an object subclass of Timespec64Abstract")
 
-        # pylint: disable=E1101
-        result = Timespec64Concrete(
-            tv_sec=self.tv_sec - other.tv_sec,
-            tv_nsec=self.tv_nsec - other.tv_nsec,
-        )
-
-        result.normalize()
-
         return self + other.negate()
 
-    def negate(self):
+    def negate(self) -> "Timespec64Concrete":
         """Returns a new Timespec64Concrete object with the values of the current object negated"""
         # pylint: disable=E1101
         result = Timespec64Concrete(
