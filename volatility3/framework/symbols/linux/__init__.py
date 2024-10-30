@@ -615,7 +615,7 @@ class IDStorage(ABC):
 
         return nodep
 
-    def _iter_node(self, nodep, height) -> int:
+    def _iter_node(self, nodep, height) -> Iterator[int]:
         node = self.nodep_to_node(nodep)
         node_slots = node.slots
         for off in range(self.CHUNK_SIZE):
@@ -632,7 +632,7 @@ class IDStorage(ABC):
                 for child_node in self._iter_node(nodep, height - 1):
                     yield child_node
 
-    def get_entries(self, root: interfaces.objects.ObjectInterface) -> int:
+    def get_entries(self, root: interfaces.objects.ObjectInterface) -> Iterator[int]:
         """Walks the tree data structure
 
         Args:
@@ -818,7 +818,7 @@ class PageCache(object):
         self._page_cache = page_cache
         self._idstorage = IDStorage.choose_id_storage(context, kernel_module_name)
 
-    def get_cached_pages(self) -> interfaces.objects.ObjectInterface:
+    def get_cached_pages(self) -> Iterator[interfaces.objects.ObjectInterface]:
         """Returns all page cache contents
 
         Yields:

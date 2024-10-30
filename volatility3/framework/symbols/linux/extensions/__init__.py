@@ -26,10 +26,6 @@ vollog = logging.getLogger(__name__)
 
 class module(generic.GenericIntelProcess):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._mod_mem_type = None  # Initialize _mod_mem_type to None for memoization
-
     def is_valid(self):
         """Determine whether it is a valid module object by verifying the self-referential
         in module_kobject. This also confirms that the module is actively allocated and
@@ -61,8 +57,8 @@ class module(generic.GenericIntelProcess):
 
         return True
 
-    @property
-    def mod_mem_type(self):
+    @functools.cached_property
+    def mod_mem_type(self) -> Dict:
         """Return the mod_mem_type enum choices if available or an empty dict if not"""
         # mod_mem_type and module_memory were added in kernel 6.4 which replaces
         # module_layout for storing the information around core_layout etc.
@@ -1331,7 +1327,7 @@ class vfsmount(objects.StructType):
             bool: 'True' if the given argument points to the the same 'vfsmount'
             as 'self'.
         """
-        if type(vfsmount_ptr) == objects.Pointer:
+        if isinstance(vfsmount_ptr, objects.Pointer):
             return self.vol.offset == vfsmount_ptr
         else:
             raise exceptions.VolatilityException(
