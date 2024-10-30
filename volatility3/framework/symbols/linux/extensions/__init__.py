@@ -2266,7 +2266,7 @@ class Timespec64Abstract(abc.ABC):
 
 class Timespec64Concrete(Timespec64Abstract):
     """Handle all required timespec64 operations, convertions and adjustments.
-    This is used to dynamically create timespec64-like objects, each its own variables
+    This is used to dynamically create timespec64-like objects, each with its own variables
     and the same methods as a timespec64 object extension.
     """
 
