@@ -13,24 +13,7 @@ from typing import Generator, Iterable, Iterator, Optional, Tuple, List, Union, 
 
 from volatility3.framework import constants, exceptions, objects, interfaces, symbols
 from volatility3.framework.renderers import conversion
-from volatility3.framework.constants.linux import (
-    SOCK_TYPES,
-    SOCK_FAMILY,
-    IP_PROTOCOLS,
-    IPV6_PROTOCOLS,
-    TCP_STATES,
-    NETLINK_PROTOCOLS,
-    ETH_PROTOCOLS,
-    BLUETOOTH_STATES,
-    BLUETOOTH_PROTOCOLS,
-    SOCKET_STATES,
-    CAPABILITIES,
-    PT_FLAGS,
-    MODULE_MAXIMUM_CORE_SIZE,
-    MODULE_MAXIMUM_CORE_TEXT_SIZE,
-    MODULE_MINIMUM_SIZE,
-)
-
+from volatility3.framework.constants import linux as linux_constants
 from volatility3.framework.layers import linear
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
@@ -62,9 +45,9 @@ class module(generic.GenericIntelProcess):
         core_text_size = self.get_core_text_size()
         init_size = self.get_init_size()
         if not (
-            0 < core_text_size <= MODULE_MAXIMUM_CORE_TEXT_SIZE
-            and 0 < core_size <= MODULE_MAXIMUM_CORE_SIZE
-            and core_size + init_size >= MODULE_MINIMUM_SIZE
+            0 < core_text_size <= linux_constants.MODULE_MAXIMUM_CORE_TEXT_SIZE
+            and 0 < core_size <= linux_constants.MODULE_MAXIMUM_CORE_SIZE
+            and core_size + init_size >= linux_constants.MODULE_MINIMUM_SIZE
         ):
             return False
 
@@ -383,7 +366,7 @@ class task_struct(generic.GenericIntelProcess):
         Returns:
             bool: True, if this task is a kernel thread. Otherwise, False.
         """
-        return (self.flags & constants.linux.PF_KTHREAD) != 0
+        return (self.flags & linux_constants.PF_KTHREAD) != 0
 
     @property
     def is_thread_group_leader(self) -> bool:
@@ -460,7 +443,11 @@ class task_struct(generic.GenericIntelProcess):
 
     def get_ptrace_tracee_flags(self) -> Optional[str]:
         """Returns a string with the ptrace flags"""
-        return PT_FLAGS(self.ptrace).flags if self.is_being_ptraced else None
+        return (
+            linux_constants.PT_FLAGS(self.ptrace).flags
+            if self.is_being_ptraced
+            else None
+        )
 
 
 class fs_struct(objects.StructType):
@@ -1567,18 +1554,18 @@ class socket(objects.StructType):
 
     def get_state(self):
         socket_state_idx = self.state
-        if 0 <= socket_state_idx < len(SOCKET_STATES):
-            return SOCKET_STATES[socket_state_idx]
+        if 0 <= socket_state_idx < len(linux_constants.SOCKET_STATES):
+            return linux_constants.SOCKET_STATES[socket_state_idx]
 
 
 class sock(objects.StructType):
     def get_family(self):
         family_idx = self.__sk_common.skc_family
-        if 0 <= family_idx < len(SOCK_FAMILY):
-            return SOCK_FAMILY[family_idx]
+        if 0 <= family_idx < len(linux_constants.SOCK_FAMILY):
+            return linux_constants.SOCK_FAMILY[family_idx]
 
     def get_type(self):
-        return SOCK_TYPES.get(self.sk_type, "")
+        return linux_constants.SOCK_TYPES.get(self.sk_type, "")
 
     def get_inode(self):
         if not self.sk_socket:
@@ -1612,8 +1599,8 @@ class unix_sock(objects.StructType):
         # Unix socket states reuse (a subset) of the inet_sock states contants
         if self.sk.get_type() == "STREAM":
             state_idx = self.sk.__sk_common.skc_state
-            if 0 <= state_idx < len(TCP_STATES):
-                return TCP_STATES[state_idx]
+            if 0 <= state_idx < len(linux_constants.TCP_STATES):
+                return linux_constants.TCP_STATES[state_idx]
         else:
             # Return the generic socket state
             return self.sk.sk_socket.get_state()
@@ -1625,15 +1612,15 @@ class unix_sock(objects.StructType):
 class inet_sock(objects.StructType):
     def get_family(self):
         family_idx = self.sk.__sk_common.skc_family
-        if 0 <= family_idx < len(SOCK_FAMILY):
-            return SOCK_FAMILY[family_idx]
+        if 0 <= family_idx < len(linux_constants.SOCK_FAMILY):
+            return linux_constants.SOCK_FAMILY[family_idx]
 
     def get_protocol(self):
         # If INET6 family and a proto is defined, we use that specific IPv6 protocol.
         # Otherwise, we use the standard IP protocol.
-        protocol = IP_PROTOCOLS.get(self.sk.sk_protocol)
+        protocol = linux_constants.IP_PROTOCOLS.get(self.sk.sk_protocol)
         if self.get_family() == "AF_INET6":
-            protocol = IPV6_PROTOCOLS.get(self.sk.sk_protocol, protocol)
+            protocol = linux_constants.IPV6_PROTOCOLS.get(self.sk.sk_protocol, protocol)
         return protocol
 
     def get_state(self):
@@ -1641,8 +1628,8 @@ class inet_sock(objects.StructType):
 
         if self.sk.get_type() == "STREAM":
             state_idx = self.sk.__sk_common.skc_state
-            if 0 <= state_idx < len(TCP_STATES):
-                return TCP_STATES[state_idx]
+            if 0 <= state_idx < len(linux_constants.TCP_STATES):
+                return linux_constants.TCP_STATES[state_idx]
         else:
             # Return the generic socket state
             return self.sk.sk_socket.get_state()
@@ -1725,8 +1712,8 @@ class inet_sock(objects.StructType):
 class netlink_sock(objects.StructType):
     def get_protocol(self):
         protocol_idx = self.sk.sk_protocol
-        if 0 <= protocol_idx < len(NETLINK_PROTOCOLS):
-            return NETLINK_PROTOCOLS[protocol_idx]
+        if 0 <= protocol_idx < len(linux_constants.NETLINK_PROTOCOLS):
+            return linux_constants.NETLINK_PROTOCOLS[protocol_idx]
 
     def get_state(self):
         # Return the generic socket state
@@ -1768,8 +1755,8 @@ class packet_sock(objects.StructType):
         eth_proto = socket_module.htons(self.num)
         if eth_proto == 0:
             return None
-        elif eth_proto in ETH_PROTOCOLS:
-            return ETH_PROTOCOLS[eth_proto]
+        elif eth_proto in linux_constants.ETH_PROTOCOLS:
+            return linux_constants.ETH_PROTOCOLS[eth_proto]
         else:
             return f"0x{eth_proto:x}"
 
@@ -1781,13 +1768,13 @@ class packet_sock(objects.StructType):
 class bt_sock(objects.StructType):
     def get_protocol(self):
         type_idx = self.sk.sk_protocol
-        if 0 <= type_idx < len(BLUETOOTH_PROTOCOLS):
-            return BLUETOOTH_PROTOCOLS[type_idx]
+        if 0 <= type_idx < len(linux_constants.BLUETOOTH_PROTOCOLS):
+            return linux_constants.BLUETOOTH_PROTOCOLS[type_idx]
 
     def get_state(self):
         state_idx = self.sk.__sk_common.skc_state
-        if 0 <= state_idx < len(BLUETOOTH_STATES):
-            return BLUETOOTH_STATES[state_idx]
+        if 0 <= state_idx < len(linux_constants.BLUETOOTH_STATES):
+            return linux_constants.BLUETOOTH_STATES[state_idx]
 
 
 class xdp_sock(objects.StructType):
@@ -1905,7 +1892,7 @@ class kernel_cap_struct(objects.StructType):
         Returns:
             int: The latest capability ID supported by the framework.
         """
-        return len(CAPABILITIES) - 1
+        return len(linux_constants.CAPABILITIES) - 1
 
     def get_kernel_cap_full(self) -> int:
         """Return the maximum value allowed for this kernel for a capability
@@ -1934,7 +1921,7 @@ class kernel_cap_struct(objects.StructType):
         """
 
         capabilities = []
-        for bit, name in enumerate(CAPABILITIES):
+        for bit, name in enumerate(linux_constants.CAPABILITIES):
             if capabilities_bitfield & (1 << bit) != 0:
                 capabilities.append(name)
 
@@ -1995,10 +1982,10 @@ class kernel_cap_struct(objects.StructType):
         Returns:
             bool: "True" if the given capability is enabled.
         """
-        if capability not in CAPABILITIES:
+        if capability not in linux_constants.CAPABILITIES:
             raise AttributeError(f"Unknown capability with name '{capability}'")
 
-        cap_value = 1 << CAPABILITIES.index(capability)
+        cap_value = 1 << linux_constants.CAPABILITIES.index(capability)
         return cap_value & self.get_capabilities() != 0
 
 
