@@ -116,6 +116,7 @@ class Modxview(interfaces.plugins.PluginInterface):
             for module in modules:
                 if deduplicate and module.vol.offset in seen_addresses:
                     continue
+                seen_addresses.add(module.vol.offset)
                 yield module
 
     @classmethod
