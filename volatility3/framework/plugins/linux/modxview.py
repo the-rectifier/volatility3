@@ -184,8 +184,8 @@ class Modxview(interfaces.plugins.PluginInterface):
         columns = [
             ("Name", str),
             ("Address", format_hints.Hex),
-            ("In /proc/modules", bool),
-            ("In /sys/module/", bool),
+            ("In procfs", bool),
+            ("In sysfs", bool),
             ("Hidden", bool),
             ("Taints", str),
         ]
