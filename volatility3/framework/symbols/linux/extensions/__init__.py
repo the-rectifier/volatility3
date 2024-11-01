@@ -287,8 +287,8 @@ class module(generic.GenericIntelProcess):
             The raw taints string.
         """
         taints_string = ""
-        for char, infos in linux_constants.TAINT_FLAGS.items():
-            if infos["module"] and self.taints_value & infos["shift"]:
+        for char, taint_flag in linux_constants.TAINT_FLAGS.items():
+            if taint_flag.module and self.taints_value & taint_flag.shift:
                 taints_string += char
 
         return taints_string
@@ -342,11 +342,11 @@ class module(generic.GenericIntelProcess):
         """
         comprehensive_taints = []
         for c in self.get_taints_as_plain_string():
-            infos = linux_constants.TAINT_FLAGS.get(c)
-            if not infos:
+            taint_flag = linux_constants.TAINT_FLAGS.get(c)
+            if not taint_flag:
                 comprehensive_taints.append(f"<UNKNOWN_TAINT_CHAR_{c}>")
-            elif infos["when_present"]:
-                comprehensive_taints.append(infos["desc"])
+            elif taint_flag.when_present:
+                comprehensive_taints.append(taint_flag.desc)
 
         return comprehensive_taints
 
