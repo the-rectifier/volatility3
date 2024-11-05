@@ -14,12 +14,7 @@ from typing import Generator, Iterable, Iterator, Optional, Tuple, List, Union, 
 
 from volatility3.framework import constants, exceptions, objects, interfaces, symbols
 from volatility3.framework.renderers import conversion
-from volatility3.framework.constants.linux import SOCK_TYPES, SOCK_FAMILY
-from volatility3.framework.constants.linux import IP_PROTOCOLS, IPV6_PROTOCOLS
-from volatility3.framework.constants.linux import TCP_STATES, NETLINK_PROTOCOLS
-from volatility3.framework.constants.linux import ETH_PROTOCOLS, BLUETOOTH_STATES
-from volatility3.framework.constants.linux import BLUETOOTH_PROTOCOLS, SOCKET_STATES
-from volatility3.framework.constants.linux import CAPABILITIES, PT_FLAGS, NSEC_PER_SEC
+from volatility3.framework.constants import linux as linux_constants
 from volatility3.framework.layers import linear
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
@@ -33,112 +28,140 @@ vollog = logging.getLogger(__name__)
 
 class module(generic.GenericIntelProcess):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._mod_mem_type = None  # Initialize _mod_mem_type to None for memoization
+    def is_valid(self):
+        """Determine whether it is a valid module object by verifying the self-referential
+        in module_kobject. This also confirms that the module is actively allocated and
+        not a remnant of freed memory or a failed module load attempt by verifying the
+        module memory section sizes.
+        """
+        layer = self._context.layers[self.vol.layer_name]
+        # Make sure the entire module content is readable
+        if not layer.is_valid(self.vol.offset, self.vol.size):
+            return False
 
-    @property
-    def mod_mem_type(self):
+        core_size = self.get_core_size()
+        core_text_size = self.get_core_text_size()
+        init_size = self.get_init_size()
+        if not (
+            0 < core_text_size <= linux_constants.MODULE_MAXIMUM_CORE_TEXT_SIZE
+            and 0 < core_size <= linux_constants.MODULE_MAXIMUM_CORE_SIZE
+            and core_size + init_size >= linux_constants.MODULE_MINIMUM_SIZE
+        ):
+            return False
+
+        if not (
+            self.mkobj
+            and self.mkobj.mod
+            and self.mkobj.mod.is_readable()
+            and self.mkobj.mod == self.vol.offset
+        ):
+            return False
+
+        return True
+
+    @functools.cached_property
+    def mod_mem_type(self) -> Dict:
         """Return the mod_mem_type enum choices if available or an empty dict if not"""
         # mod_mem_type and module_memory were added in kernel 6.4 which replaces
         # module_layout for storing the information around core_layout etc.
         # see commit ac3b43283923440900b4f36ca5f9f0b1ca43b70e for more information
+        symbol_table_name = self.get_symbol_table_name()
+        mod_mem_type_symname = symbol_table_name + constants.BANG + "mod_mem_type"
+        symbol_space = self._context.symbol_space
+        try:
+            mod_mem_type = symbol_space.get_enumeration(mod_mem_type_symname).choices
+        except exceptions.SymbolError:
+            mod_mem_type = {}
+            vollog.debug(
+                "Unable to find mod_mem_type enum. This message can be ignored for kernels < 6.4"
+            )
 
-        if self._mod_mem_type is None:
-            try:
-                self._mod_mem_type = self._context.symbol_space.get_enumeration(
-                    self.get_symbol_table_name() + constants.BANG + "mod_mem_type"
-                ).choices
-            except exceptions.SymbolError:
-                vollog.debug(
-                    "Unable to find mod_mem_type enum. This message can be ignored for kernels < 6.4"
-                )
-                # set to empty dict to show that the enum was not found, and so shouldn't be searched for again
-                self._mod_mem_type = {}
-        return self._mod_mem_type
+        return mod_mem_type
+
+    def _get_mem_type(self, mod_mem_type_name):
+        module_mem_index = self.mod_mem_type.get(mod_mem_type_name)
+        if module_mem_index is None:
+            raise AttributeError(f"Unknown module memory type '{mod_mem_type_name}'")
+
+        if not (0 <= module_mem_index < self.mem.count):
+            raise AttributeError(
+                f"Invalid module memory type index '{module_mem_index}'"
+            )
+
+        return self.mem[module_mem_index]
+
+    def _get_mem_size(self, mod_mem_type_name):
+        return self._get_mem_type(mod_mem_type_name).size
+
+    def _get_mem_base(self, mod_mem_type_name):
+        return self._get_mem_type(mod_mem_type_name).base
 
     def get_module_base(self):
         if self.has_member("mem"):  # kernels 6.4+
-            try:
-                return self.mem[self.mod_mem_type["MOD_TEXT"]].base
-            except KeyError:
-                raise AttributeError(
-                    "module -> get_module_base: Unable to get module base. Cannot read base from MOD_TEXT."
-                )
+            return self._get_mem_base("MOD_TEXT")
         elif self.has_member("core_layout"):
             return self.core_layout.base
         elif self.has_member("module_core"):
             return self.module_core
-        raise AttributeError("module -> get_module_base: Unable to get module base")
+
+        raise AttributeError("Unable to get module base")
 
     def get_init_size(self):
         if self.has_member("mem"):  # kernels 6.4+
-            try:
-                return (
-                    self.mem[self.mod_mem_type["MOD_INIT_TEXT"]].size
-                    + self.mem[self.mod_mem_type["MOD_INIT_DATA"]].size
-                    + self.mem[self.mod_mem_type["MOD_INIT_RODATA"]].size
-                )
-            except KeyError:
-                raise AttributeError(
-                    "module -> get_init_size: Unable to determine .init section size of module. Cannot read size of MOD_INIT_TEXT, MOD_INIT_DATA, and MOD_INIT_RODATA"
-                )
+            return (
+                self._get_mem_size("MOD_INIT_TEXT")
+                + self._get_mem_size("MOD_INIT_DATA")
+                + self._get_mem_size("MOD_INIT_RODATA")
+            )
         elif self.has_member("init_layout"):
             return self.init_layout.size
         elif self.has_member("init_size"):
             return self.init_size
-        raise AttributeError(
-            "module -> get_init_size: Unable to determine .init section size of module"
-        )
+
+        raise AttributeError("Unable to determine .init section size of module")
 
     def get_core_size(self):
         if self.has_member("mem"):  # kernels 6.4+
-            try:
-                return (
-                    self.mem[self.mod_mem_type["MOD_TEXT"]].size
-                    + self.mem[self.mod_mem_type["MOD_DATA"]].size
-                    + self.mem[self.mod_mem_type["MOD_RODATA"]].size
-                    + self.mem[self.mod_mem_type["MOD_RO_AFTER_INIT"]].size
-                )
-            except KeyError:
-                raise AttributeError(
-                    "module -> get_core_size: Unable to determine core size of module. Cannot read size of MOD_TEXT, MOD_DATA, MOD_RODATA, and MOD_RO_AFTER_INIT."
-                )
+            return (
+                self._get_mem_size("MOD_TEXT")
+                + self._get_mem_size("MOD_DATA")
+                + self._get_mem_size("MOD_RODATA")
+                + self._get_mem_size("MOD_RO_AFTER_INIT")
+            )
         elif self.has_member("core_layout"):
             return self.core_layout.size
         elif self.has_member("core_size"):
             return self.core_size
-        raise AttributeError(
-            "module -> get_core_size: Unable to determine core size of module"
-        )
+
+        raise AttributeError("Unable to determine core size of module")
+
+    def get_core_text_size(self):
+        if self.has_member("mem"):  # kernels 6.4+
+            return self._get_mem_size("MOD_TEXT")
+        elif self.has_member("core_layout"):
+            return self.core_layout.text_size
+        elif self.has_member("core_text_size"):
+            return self.core_text_size
+
+        raise AttributeError("Unable to determine core text size of module")
 
     def get_module_core(self):
         if self.has_member("mem"):  # kernels 6.4+
-            try:
-                return self.mem[self.mod_mem_type["MOD_TEXT"]].base
-            except KeyError:
-                raise AttributeError(
-                    "module -> get_module_core: Unable to get module core. Cannot read base from MOD_TEXT."
-                )
+            return self._get_mem_base("MOD_TEXT")
         elif self.has_member("core_layout"):
             return self.core_layout.base
         elif self.has_member("module_core"):
             return self.module_core
-        raise AttributeError("module -> get_module_core: Unable to get module core")
+        raise AttributeError("Unable to get module core")
 
     def get_module_init(self):
         if self.has_member("mem"):  # kernels 6.4+
-            try:
-                return self.mem[self.mod_mem_type["MOD_INIT_TEXT"]].base
-            except KeyError:
-                raise AttributeError(
-                    "module -> get_module_core: Unable to get module init. Cannot read base from MOD_INIT_TEXT."
-                )
+            return self._get_mem_base("MOD_INIT_TEXT")
         elif self.has_member("init_layout"):
             return self.init_layout.base
         elif self.has_member("module_init"):
             return self.module_init
-        raise AttributeError("module -> get_module_init: Unable to get module init")
+        raise AttributeError("Unable to get module init")
 
     def get_name(self):
         """Get the name of the module as a string"""
@@ -340,7 +363,7 @@ class task_struct(generic.GenericIntelProcess):
         Returns:
             bool: True, if this task is a kernel thread. Otherwise, False.
         """
-        return (self.flags & constants.linux.PF_KTHREAD) != 0
+        return (self.flags & linux_constants.PF_KTHREAD) != 0
 
     @property
     def is_thread_group_leader(self) -> bool:
@@ -417,7 +440,11 @@ class task_struct(generic.GenericIntelProcess):
 
     def get_ptrace_tracee_flags(self) -> Optional[str]:
         """Returns a string with the ptrace flags"""
-        return PT_FLAGS(self.ptrace).flags if self.is_being_ptraced else None
+        return (
+            linux_constants.PT_FLAGS(self.ptrace).flags
+            if self.is_being_ptraced
+            else None
+        )
 
     def _get_task_start_time(self) -> datetime.timedelta:
         """Returns the task's monotonic start_time as a timedelta.
@@ -1492,7 +1519,7 @@ class vfsmount(objects.StructType):
             bool: 'True' if the given argument points to the the same 'vfsmount'
             as 'self'.
         """
-        if type(vfsmount_ptr) == objects.Pointer:
+        if isinstance(vfsmount_ptr, objects.Pointer):
             return self.vol.offset == vfsmount_ptr
         else:
             raise exceptions.VolatilityException(
@@ -1715,18 +1742,18 @@ class socket(objects.StructType):
 
     def get_state(self):
         socket_state_idx = self.state
-        if 0 <= socket_state_idx < len(SOCKET_STATES):
-            return SOCKET_STATES[socket_state_idx]
+        if 0 <= socket_state_idx < len(linux_constants.SOCKET_STATES):
+            return linux_constants.SOCKET_STATES[socket_state_idx]
 
 
 class sock(objects.StructType):
     def get_family(self):
         family_idx = self.__sk_common.skc_family
-        if 0 <= family_idx < len(SOCK_FAMILY):
-            return SOCK_FAMILY[family_idx]
+        if 0 <= family_idx < len(linux_constants.SOCK_FAMILY):
+            return linux_constants.SOCK_FAMILY[family_idx]
 
     def get_type(self):
-        return SOCK_TYPES.get(self.sk_type, "")
+        return linux_constants.SOCK_TYPES.get(self.sk_type, "")
 
     def get_inode(self):
         if not self.sk_socket:
@@ -1760,8 +1787,8 @@ class unix_sock(objects.StructType):
         # Unix socket states reuse (a subset) of the inet_sock states contants
         if self.sk.get_type() == "STREAM":
             state_idx = self.sk.__sk_common.skc_state
-            if 0 <= state_idx < len(TCP_STATES):
-                return TCP_STATES[state_idx]
+            if 0 <= state_idx < len(linux_constants.TCP_STATES):
+                return linux_constants.TCP_STATES[state_idx]
         else:
             # Return the generic socket state
             return self.sk.sk_socket.get_state()
@@ -1773,15 +1800,15 @@ class unix_sock(objects.StructType):
 class inet_sock(objects.StructType):
     def get_family(self):
         family_idx = self.sk.__sk_common.skc_family
-        if 0 <= family_idx < len(SOCK_FAMILY):
-            return SOCK_FAMILY[family_idx]
+        if 0 <= family_idx < len(linux_constants.SOCK_FAMILY):
+            return linux_constants.SOCK_FAMILY[family_idx]
 
     def get_protocol(self):
         # If INET6 family and a proto is defined, we use that specific IPv6 protocol.
         # Otherwise, we use the standard IP protocol.
-        protocol = IP_PROTOCOLS.get(self.sk.sk_protocol)
+        protocol = linux_constants.IP_PROTOCOLS.get(self.sk.sk_protocol)
         if self.get_family() == "AF_INET6":
-            protocol = IPV6_PROTOCOLS.get(self.sk.sk_protocol, protocol)
+            protocol = linux_constants.IPV6_PROTOCOLS.get(self.sk.sk_protocol, protocol)
         return protocol
 
     def get_state(self):
@@ -1789,8 +1816,8 @@ class inet_sock(objects.StructType):
 
         if self.sk.get_type() == "STREAM":
             state_idx = self.sk.__sk_common.skc_state
-            if 0 <= state_idx < len(TCP_STATES):
-                return TCP_STATES[state_idx]
+            if 0 <= state_idx < len(linux_constants.TCP_STATES):
+                return linux_constants.TCP_STATES[state_idx]
         else:
             # Return the generic socket state
             return self.sk.sk_socket.get_state()
@@ -1873,8 +1900,8 @@ class inet_sock(objects.StructType):
 class netlink_sock(objects.StructType):
     def get_protocol(self):
         protocol_idx = self.sk.sk_protocol
-        if 0 <= protocol_idx < len(NETLINK_PROTOCOLS):
-            return NETLINK_PROTOCOLS[protocol_idx]
+        if 0 <= protocol_idx < len(linux_constants.NETLINK_PROTOCOLS):
+            return linux_constants.NETLINK_PROTOCOLS[protocol_idx]
 
     def get_state(self):
         # Return the generic socket state
@@ -1916,8 +1943,8 @@ class packet_sock(objects.StructType):
         eth_proto = socket_module.htons(self.num)
         if eth_proto == 0:
             return None
-        elif eth_proto in ETH_PROTOCOLS:
-            return ETH_PROTOCOLS[eth_proto]
+        elif eth_proto in linux_constants.ETH_PROTOCOLS:
+            return linux_constants.ETH_PROTOCOLS[eth_proto]
         else:
             return f"0x{eth_proto:x}"
 
@@ -1929,13 +1956,13 @@ class packet_sock(objects.StructType):
 class bt_sock(objects.StructType):
     def get_protocol(self):
         type_idx = self.sk.sk_protocol
-        if 0 <= type_idx < len(BLUETOOTH_PROTOCOLS):
-            return BLUETOOTH_PROTOCOLS[type_idx]
+        if 0 <= type_idx < len(linux_constants.BLUETOOTH_PROTOCOLS):
+            return linux_constants.BLUETOOTH_PROTOCOLS[type_idx]
 
     def get_state(self):
         state_idx = self.sk.__sk_common.skc_state
-        if 0 <= state_idx < len(BLUETOOTH_STATES):
-            return BLUETOOTH_STATES[state_idx]
+        if 0 <= state_idx < len(linux_constants.BLUETOOTH_STATES):
+            return linux_constants.BLUETOOTH_STATES[state_idx]
 
 
 class xdp_sock(objects.StructType):
@@ -2053,7 +2080,7 @@ class kernel_cap_struct(objects.StructType):
         Returns:
             int: The latest capability ID supported by the framework.
         """
-        return len(CAPABILITIES) - 1
+        return len(linux_constants.CAPABILITIES) - 1
 
     def get_kernel_cap_full(self) -> int:
         """Return the maximum value allowed for this kernel for a capability
@@ -2082,7 +2109,7 @@ class kernel_cap_struct(objects.StructType):
         """
 
         capabilities = []
-        for bit, name in enumerate(CAPABILITIES):
+        for bit, name in enumerate(linux_constants.CAPABILITIES):
             if capabilities_bitfield & (1 << bit) != 0:
                 capabilities.append(name)
 
@@ -2143,10 +2170,10 @@ class kernel_cap_struct(objects.StructType):
         Returns:
             bool: "True" if the given capability is enabled.
         """
-        if capability not in CAPABILITIES:
+        if capability not in linux_constants.CAPABILITIES:
             raise AttributeError(f"Unknown capability with name '{capability}'")
 
-        cap_value = 1 << CAPABILITIES.index(capability)
+        cap_value = 1 << linux_constants.CAPABILITIES.index(capability)
         return cap_value & self.get_capabilities() != 0
 
 
