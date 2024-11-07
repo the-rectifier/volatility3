@@ -13,6 +13,7 @@ from volatility3 import classproperty
 from volatility3.framework import exceptions, interfaces, constants
 from volatility3.framework.configuration import requirements
 from volatility3.framework.layers import linear
+from volatility3.framework.constants import linux as linux_constants
 
 vollog = logging.getLogger(__name__)
 
@@ -163,11 +164,16 @@ class Intel(linear.LinearlyMappedLayer):
                 entry,
                 f"Page Fault at entry {hex(entry)} in page entry",
             )
-        page = self._mask(entry, self._maxphyaddr - 1, position + 1) | self._mask(
-            offset, position, 0
-        )
+
+        pfn = self.pte_pfn(entry)
+        page_offset = self._mask(offset, position, 0)
+        page = pfn << self.page_shift | page_offset
 
         return page, 1 << (position + 1), self._base_layer
+
+    def pte_pfn(self, entry: int) -> int:
+        """Extracts the page frame number (PFN) from the page table entry (PTE) entry"""
+        return entry >> self.page_shift
 
     def _translate_entry(self, offset: int) -> Tuple[int, int]:
         """Translates a specific offset based on paging tables.
@@ -203,10 +209,10 @@ class Intel(linear.LinearlyMappedLayer):
                     "Page Fault at entry " + hex(entry) + " in table " + name,
                 )
             # Check if we're a large page
-            if large_page and (entry & (1 << 7)):
+            if large_page and (entry & (1 << linux_constants.PAGE_BIT_PSE)):
                 # Mask off the PAT bit
-                if entry & (1 << 12):
-                    entry -= 1 << 12
+                if entry & (1 << linux_constants.PAGE_BIT_PAT_LARGE):
+                    entry -= 1 << linux_constants.PAGE_BIT_PAT_LARGE
                 # We're a large page, the rest is finished below
                 # If we want to implement PSE-36, it would need to be done here
                 break
@@ -501,3 +507,85 @@ class WindowsIntel32e(WindowsMixin, Intel32e):
 
     def _translate(self, offset: int) -> Tuple[int, int, str]:
         return self._translate_swap(self, offset, self._bits_per_register // 2)
+
+
+class LinuxMixin(Intel):
+    @functools.cached_property
+    def register_mask(self) -> int:
+        return (1 << self._bits_per_register) - 1
+
+    @functools.cached_property
+    def physical_mask(self) -> int:
+        # From kernels 4.18 the physical mask is dynamic: See AMD SME, Intel Multi-Key Total
+        # Memory Encryption and CONFIG_DYNAMIC_PHYSICAL_MASK: 94d49eb30e854c84d1319095b5dd0405a7da9362
+        physical_mask = (1 << self._maxphyaddr) - 1
+        # TODO: Come back once SME support is available in the framework
+        return physical_mask
+
+    @functools.cached_property
+    def page_mask(self) -> int:
+        # Note that within the Intel class it's a class method. However, since it uses
+        # complement operations and we are working in Python, it would be more careful to
+        # limit it to the architecture's pointer size.
+        return ~(self.page_size - 1) & self.register_mask
+
+    @functools.cached_property
+    def physical_page_mask(self) -> int:
+        return self.page_mask & self.physical_mask
+
+    @functools.cached_property
+    def pte_pfn_mask(self) -> int:
+        return self.physical_page_mask
+
+    @functools.cached_property
+    def pte_flags_mask(self) -> int:
+        return ~self.pte_pfn_mask & self.register_mask
+
+    def pte_flags(self, pte) -> int:
+        return pte & self.pte_flags_mask
+
+    def is_pte_present(self, entry: int) -> bool:
+        return (
+            self.pte_flags(entry)
+            & (linux_constants.PAGE_PRESENT | linux_constants.PAGE_PROTNONE)
+        ) != 0
+
+    def _page_is_valid(self, entry: int) -> bool:
+        # Overrides the Intel static method with the Linux-specific implementation
+        return self.is_pte_present(entry)
+
+    def pte_needs_invert(self, entry) -> bool:
+        # Entries that were set to PROT_NONE (PAGE_PRESENT/PAGE_GLOBAL) are inverted
+        return not (entry & linux_constants.PAGE_PRESENT)
+
+    def protnone_mask(self, entry: int) -> int:
+        """Gets a mask to XOR with the page table entry to get the correct PFN"""
+        return ~0 & self.register_mask if self.pte_needs_invert(entry) else 0
+
+    def pte_pfn(self, entry: int) -> int:
+        """Extracts the page frame number from the page table entry"""
+        pfn = entry ^ self.protnone_mask(entry)
+        return (pfn & self.pte_pfn_mask) >> self.page_shift
+
+
+class LinuxIntel(LinuxMixin, Intel):
+    pass
+
+
+class LinuxIntelPAE(LinuxMixin, IntelPAE):
+    pass
+
+
+class LinuxIntel32e(LinuxMixin, Intel32e):
+    # In the Linux kernel, the __PHYSICAL_MASK_SHIFT is a mask used to extract the
+    # physical address from a PTE. In Volatility3, this is referred to as _maxphyaddr.
+    #
+    # Until kernel version 4.17, Linux x86-64 used a 46-bit mask. With commit
+    # b83ce5ee91471d19c403ff91227204fb37c95fb2, this was extended to 52 bits,
+    # applying to both 4 and 5-level page tables.
+    #
+    # We initially used 52 bits for all Intel 64-bit systems, but this produced incorrect
+    # results for PROT_NONE pages. Since the mask value is defined by a preprocessor macro,
+    # it's difficult to detect the exact bit shift used in the current kernel.
+    # Using 46 bits has proven reliable for our use case, as seen in tools like crashtool.
+    _maxphyaddr = 46
