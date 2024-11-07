@@ -9,7 +9,8 @@ yara-python>=3.8.0
 
 # This is required for several plugins that perform malware analysis and disassemble code.
 # It can also improve accuracy of Windows 8 and later memory samples.
-capstone>=3.0.5
+# FIXME: Version 6.0.0 is incompatible (#1336) so we'll need an adaptor at some point
+capstone>=3.0.5,<6.0.0
 
 # This is required by plugins that decrypt passwords, password hashes, etc.
 pycryptodome
