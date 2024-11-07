@@ -140,7 +140,7 @@ class Malfind(interfaces.plugins.PluginInterface):
                                 dirty_page_check = True
                                 break
                         except exceptions.InvalidAddressException:
-                            # Abort as it is likely that other addresses in the same range will also fail
+                            # Abort as it is likely that other addresses in the same range will also fail.
                             break
                     if not dirty_page_check:
                         continue
