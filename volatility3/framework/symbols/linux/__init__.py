@@ -43,6 +43,7 @@ class LinuxKernelIntermedSymbols(intermed.IntermediateSymbolTable):
         self.optional_set_type_class("bpf_prog_aux", extensions.bpf_prog_aux)
         self.optional_set_type_class("kernel_cap_struct", extensions.kernel_cap_struct)
         self.optional_set_type_class("kernel_cap_t", extensions.kernel_cap_t)
+        self.optional_set_type_class("scatterlist", extensions.scatterlist)
 
         # kernels >= 4.18
         self.optional_set_type_class("timespec64", extensions.timespec64)
