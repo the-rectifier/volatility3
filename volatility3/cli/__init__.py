@@ -367,7 +367,9 @@ class CommandLine:
         )
         for plugin in sorted(plugin_list):
             plugin_parser = subparser.add_parser(
-                plugin, help=plugin_list[plugin].__doc__
+                plugin,
+                help=plugin_list[plugin].__doc__,
+                description=plugin_list[plugin].__doc__,
             )
             self.populate_requirements_argparse(plugin_parser, plugin_list[plugin])
 
