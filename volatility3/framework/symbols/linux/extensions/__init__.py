@@ -288,7 +288,7 @@ class module(generic.GenericIntelProcess):
         """
         taints_string = ""
         for char, taint_flag in linux_constants.TAINT_FLAGS.items():
-            if taint_flag.module and self.taints_value & taint_flag.shift:
+            if taint_flag.module and self.taints & taint_flag.shift:
                 taints_string += char
 
         return taints_string
@@ -310,7 +310,7 @@ class module(generic.GenericIntelProcess):
         for i, taint_flag in enumerate(self.taint_flags_list):
             c_true = chr(taint_flag.c_true)
             c_false = chr(taint_flag.c_false)
-            if taint_flag.module and (self.taints_value & (1 << i)):
+            if taint_flag.module and (self.taints & (1 << i)):
                 taints_string += c_true
             elif taint_flag.module and c_false != " ":
                 taints_string += c_false
@@ -377,10 +377,6 @@ class module(generic.GenericIntelProcess):
         elif self.has_member("strtab"):
             return self.strtab
         raise AttributeError("module -> strtab: Unable to get strtab")
-
-    @property
-    def taints_value(self) -> int:
-        return self.taints
 
     @property
     def taint_flags_list(self) -> Optional[List[interfaces.objects.ObjectInterface]]:
