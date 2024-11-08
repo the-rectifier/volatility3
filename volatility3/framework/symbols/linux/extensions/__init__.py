@@ -2445,7 +2445,7 @@ class scatterlist(objects.StructType):
         """
         return self._context.layers[self.vol.layer_name].page_size // self.vol.size
 
-    def _sg_next(self) -> interfaces.objects.ObjectInterface:
+    def _sg_next(self) -> Optional[interfaces.objects.ObjectInterface]:
         """Get the next scatterlist struct from the list.
         Based on kernel's sg_next.
 
@@ -2476,7 +2476,7 @@ class scatterlist(objects.StructType):
         )
         return sg
 
-    def for_each_sg(self) -> Iterator[interfaces.objects.ObjectInterface]:
+    def for_each_sg(self) -> Optional[Iterator[interfaces.objects.ObjectInterface]]:
         """Iterate over each struct in the scatterlist."""
         sg = self
         sg_max_single_alloc = self._get_sg_max_single_alloc()
@@ -2504,7 +2504,7 @@ class scatterlist(objects.StructType):
 
     def get_content(
         self,
-    ) -> Iterator[bytes]:
+    ) -> Optional[Iterator[bytes]]:
         """Traverse a scatterlist to gather content located at each
         dma_address position.
 
