@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.9.0"
 license = { text = "VSL" }
-dynamic = ["dependencies", "optional-dependencies", "version"]
+dynamic = ["version"]
 
 dependencies = [
     "pefile>=2024.8.26",
@@ -32,6 +32,19 @@ dev = [
     "jsonschema>=4.23.0,<5",
     "pyinstaller>=6.11.0,<7",
     "pyinstaller-hooks-contrib>=2024.9",
+]
+
+test = [
+    "volatility3[dev]",
+    "pytest>=8.3.3,<9",
+    "yara-x>=0.10.0,<1",
+]
+
+docs = [
+    "volatility3[dev]",
+    "sphinx>=8.0.0,<7",
+    "sphinx-autodoc-typehints>=2.5.0,<3",
+    "sphinx-rtd-theme>=3.0.1,<4",
 ]
 
 [project.urls]
