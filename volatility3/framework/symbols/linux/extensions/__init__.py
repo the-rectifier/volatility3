@@ -341,10 +341,10 @@ class module(generic.GenericIntelProcess):
             - module_flags_taint kernel function
         """
         comprehensive_taints = []
-        for c in self.get_taints_as_plain_string():
-            taint_flag = linux_constants.TAINT_FLAGS.get(c)
+        for character in self.get_taints_as_plain_string():
+            taint_flag = linux_constants.TAINT_FLAGS.get(character)
             if not taint_flag:
-                comprehensive_taints.append(f"<UNKNOWN_TAINT_CHAR_{c}>")
+                comprehensive_taints.append(f"<UNKNOWN_TAINT_CHAR_{character}>")
             elif taint_flag.when_present:
                 comprehensive_taints.append(taint_flag.desc)
 
