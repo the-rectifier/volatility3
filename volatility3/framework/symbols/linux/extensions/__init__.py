@@ -240,7 +240,7 @@ class module(generic.GenericIntelProcess):
             for sym in syms:
                 yield sym
 
-    def get_symbols_names_and_addresses(self) -> Tuple[str, int]:
+    def get_symbols_names_and_addresses(self) -> Iterable[Tuple[str, int]]:
         """Get names and addresses for each symbol of the module
 
         Yields:
@@ -1098,7 +1098,7 @@ class dentry(objects.StructType):
             current_dentry = current_dentry.d_parent
         return None
 
-    def get_subdirs(self) -> interfaces.objects.ObjectInterface:
+    def get_subdirs(self) -> Iterable[interfaces.objects.ObjectInterface]:
         """Walks dentry subdirs
 
         Yields:
@@ -2435,7 +2435,7 @@ class inode(objects.StructType):
         """
         return stat.filemode(self.i_mode)
 
-    def get_pages(self) -> interfaces.objects.ObjectInterface:
+    def get_pages(self) -> Iterable[interfaces.objects.ObjectInterface]:
         """Gets the inode's cached pages
 
         Yields:
@@ -2643,7 +2643,7 @@ class IDR(objects.StructType):
 
         return idr_layer
 
-    def _old_kernel_get_entries(self) -> int:
+    def _old_kernel_get_entries(self) -> Iterable[int]:
         # Kernels < 4.11
         cur = self.cur
         total = next_id = 0
@@ -2655,7 +2655,7 @@ class IDR(objects.StructType):
 
             next_id += 1
 
-    def _new_kernel_get_entries(self) -> int:
+    def _new_kernel_get_entries(self) -> Iterable[int]:
         # Kernels >= 4.11
         id_storage = linux.IDStorage.choose_id_storage(
             self._context, kernel_module_name="kernel"
@@ -2663,7 +2663,7 @@ class IDR(objects.StructType):
         for page_addr in id_storage.get_entries(root=self.idr_rt):
             yield page_addr
 
-    def get_entries(self) -> int:
+    def get_entries(self) -> Iterable[int]:
         """Walks the IDR and yield a pointer associated with each element.
 
         Args:
