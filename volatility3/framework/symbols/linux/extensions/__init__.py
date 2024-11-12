@@ -287,7 +287,7 @@ class module(generic.GenericIntelProcess):
             return self.kallsyms.symtab
         elif self.has_member("symtab"):
             return self.symtab
-        raise AttributeError("module -> symtab: Unable to get symtab")
+        raise AttributeError("Unable to get symtab")
 
     @property
     def num_symtab(self):
@@ -295,9 +295,7 @@ class module(generic.GenericIntelProcess):
             return int(self.kallsyms.num_symtab)
         elif self.has_member("num_symtab"):
             return int(self.member("num_symtab"))
-        raise AttributeError(
-            "module -> num_symtab: Unable to determine number of symbols"
-        )
+        raise AttributeError("Unable to determine number of symbols")
 
     @property
     def section_strtab(self):
@@ -307,7 +305,7 @@ class module(generic.GenericIntelProcess):
         # Older kernels
         elif self.has_member("strtab"):
             return self.strtab
-        raise AttributeError("module -> strtab: Unable to get strtab")
+        raise AttributeError("Unable to get strtab")
 
 
 class task_struct(generic.GenericIntelProcess):
