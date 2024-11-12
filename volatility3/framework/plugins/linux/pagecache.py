@@ -454,7 +454,7 @@ class InodePages(plugins.PluginInterface):
                     if current_fp + len(page_bytes) > inode_size:
                         vollog.error(
                             "Page out of file bounds: inode 0x%x, inode size %d, page index %d",
-                            inode.vol.object,
+                            inode.vol.offset,
                             inode_size,
                             page_idx,
                         )
