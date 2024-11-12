@@ -34,6 +34,12 @@ class Kthreads(plugins.PluginInterface):
             requirements.VersionRequirement(
                 name="linuxutils", component=linux.LinuxUtilities, version=(2, 1, 0)
             ),
+            requirements.PluginRequirement(
+                name="pslist", plugin=pslist.PsList, version=(2, 3, 0)
+            ),
+            requirements.PluginRequirement(
+                name="lsmod", plugin=lsmod.Lsmod, version=(2, 0, 0)
+            ),
         ]
 
     def _generator(self):
