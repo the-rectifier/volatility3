@@ -149,7 +149,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             (["cc", "create_configurable"], self.create_configurable),
             (["lf", "load_file"], self.load_file),
             (["rs", "run_script"], self.run_script),
-            (["re", "regex_scan"], self.regex_scan),
+            (["rx", "regex_scan"], self.regex_scan),
         ]
 
     def _construct_locals_dict(self) -> Dict[str, Any]:
@@ -292,7 +292,7 @@ class Volshell(interfaces.plugins.PluginInterface):
     def regex_scan(self, pattern, count=128, layer_name=None):
         """Scans for regex pattern in layer using RegExScanner."""
         if not isinstance(pattern, bytes):
-            raise TypeError("pattern must be bytes, e.g. re(b'pattern')")
+            raise TypeError("pattern must be bytes, e.g. rx(b'pattern')")
         layer_name_to_scan = layer_name or self.current_layer
         for offset in self.context.layers[layer_name_to_scan].scan(
             scanner=scanners.RegExScanner(pattern),
