@@ -13,7 +13,6 @@ from volatility3 import classproperty
 from volatility3.framework import exceptions, interfaces, constants
 from volatility3.framework.configuration import requirements
 from volatility3.framework.layers import linear
-from volatility3.framework.constants import linux as linux_constants
 
 vollog = logging.getLogger(__name__)
 
@@ -22,6 +21,16 @@ INTEL_TRANSLATION_DEBUGGING = False
 
 class Intel(linear.LinearlyMappedLayer):
     """Translation Layer for the Intel IA32 memory mapping."""
+
+    _PAGE_BIT_PRESENT = 0
+    _PAGE_BIT_PSE = 7  # Page Size Extension: 4 MB (or 2MB) page
+    _PAGE_BIT_PROTNONE = 8
+    _PAGE_BIT_PAT_LARGE = 12  # 2MB or 1GB pages
+
+    _PAGE_PRESENT = 1 << _PAGE_BIT_PRESENT
+    _PAGE_PSE = 1 << _PAGE_BIT_PSE
+    _PAGE_PROTNONE = 1 << _PAGE_BIT_PROTNONE
+    _PAGE_PAT_LARGE = 1 << _PAGE_BIT_PAT_LARGE
 
     _entry_format = "<I"
     _page_size_in_bits = 12
@@ -209,10 +218,10 @@ class Intel(linear.LinearlyMappedLayer):
                     "Page Fault at entry " + hex(entry) + " in table " + name,
                 )
             # Check if we're a large page
-            if large_page and (entry & (1 << linux_constants.PAGE_BIT_PSE)):
+            if large_page and (entry & self._PAGE_PSE):
                 # Mask off the PAT bit
-                if entry & (1 << linux_constants.PAGE_BIT_PAT_LARGE):
-                    entry -= 1 << linux_constants.PAGE_BIT_PAT_LARGE
+                if entry & self._PAGE_PAT_LARGE:
+                    entry -= self._PAGE_PAT_LARGE
                 # We're a large page, the rest is finished below
                 # If we want to implement PSE-36, it would need to be done here
                 break
@@ -545,10 +554,7 @@ class LinuxMixin(Intel):
         return pte & self.pte_flags_mask
 
     def is_pte_present(self, entry: int) -> bool:
-        return (
-            self.pte_flags(entry)
-            & (linux_constants.PAGE_PRESENT | linux_constants.PAGE_PROTNONE)
-        ) != 0
+        return (self.pte_flags(entry) & (self._PAGE_PRESENT | self._PAGE_PROTNONE)) != 0
 
     def _page_is_valid(self, entry: int) -> bool:
         # Overrides the Intel static method with the Linux-specific implementation
@@ -556,7 +562,7 @@ class LinuxMixin(Intel):
 
     def pte_needs_invert(self, entry) -> bool:
         # Entries that were set to PROT_NONE (PAGE_PRESENT/PAGE_GLOBAL) are inverted
-        return not (entry & linux_constants.PAGE_PRESENT)
+        return not (entry & self._PAGE_PRESENT)
 
     def protnone_mask(self, entry: int) -> int:
         """Gets a mask to XOR with the page table entry to get the correct PFN"""

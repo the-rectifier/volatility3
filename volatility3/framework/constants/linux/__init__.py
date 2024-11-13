@@ -11,14 +11,6 @@ KERNEL_NAME = "__kernel__"
 
 """The value hard coded from the Linux Kernel (hence not extracted from the layer itself)"""
 
-# Translation Layer constants
-PAGE_BIT_PRESENT = 0
-PAGE_BIT_PSE = 7  # Page Size Extension: 4 MB (or 2MB) page
-PAGE_BIT_PROTNONE = 8
-PAGE_BIT_PAT_LARGE = 12  # 2MB or 1GB pages
-PAGE_PRESENT = 1 << PAGE_BIT_PRESENT
-PAGE_PROTNONE = 1 << PAGE_BIT_PROTNONE
-
 # include/linux/sched.h
 PF_KTHREAD = 0x00200000  # I'm a kernel thread
 
