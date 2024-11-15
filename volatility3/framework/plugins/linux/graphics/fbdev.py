@@ -21,7 +21,7 @@ vollog = logging.getLogger(__name__)
 
 @dataclass
 class Framebuffer:
-    """Framebuffer object internal representation. This is useful to unify an framebuffer with precalculated
+    """Framebuffer object internal representation. This is useful to unify a framebuffer with precalculated
     properties and pass it through functions conveniently."""
 
     id: str
