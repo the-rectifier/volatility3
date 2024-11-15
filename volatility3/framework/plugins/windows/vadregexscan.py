@@ -70,7 +70,7 @@ class VadRegExScan(plugins.PluginInterface):
             proc_layer = self.context.layers[proc_layer_name]
 
             # get process sections for scanning
-            sections = sections = vadyarascan.VadYaraScan.get_vad_maps(proc)
+            sections = vadyarascan.VadYaraScan.get_vad_maps(proc)
 
             for offset in proc_layer.scan(
                 context=self.context,
