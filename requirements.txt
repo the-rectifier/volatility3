@@ -21,3 +21,9 @@ leechcorepyc>=2.4.0; sys_platform != 'darwin'
 # This is required for memory analysis on a Amazon/MinIO S3 and Google Cloud object storage
 gcsfs>=2023.1.0
 s3fs>=2023.1.0
+
+# This is required by plugins that manipulate pixels and images.
+# https://github.com/python-pillow/Pillow/blob/main/CHANGES.rst
+# 10.0.0 dropped support for Python3.7
+# 11.0.0 dropped support for Python3.8, which is still supported by Volatility3
+pillow>=10.0.0,<11.0.0
