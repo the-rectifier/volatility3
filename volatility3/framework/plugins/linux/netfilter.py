@@ -174,7 +174,7 @@ class AbstractNetfilter(ABC):
             priority [int]: Priority
             hook_ops_hook [int]: Hook address
             module_name [str]: Linux kernel module name
-            hooked [bool]: hooked?
+            hooked [bool]: "True" if the network stack has been hijacked
         """
         for netns, net in self.get_net_namespaces():
             for proto_idx, proto_name, hook_idx, hook_name in self._proto_hook_loop():
