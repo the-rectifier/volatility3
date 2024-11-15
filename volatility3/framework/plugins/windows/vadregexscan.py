@@ -4,6 +4,7 @@
 
 import logging
 import re
+from typing import List
 
 from volatility3.framework import interfaces, renderers
 from volatility3.framework.configuration import requirements
@@ -23,7 +24,7 @@ class VadRegExScan(plugins.PluginInterface):
     MAXSIZE_DEFAULT = 128
 
     @classmethod
-    def get_requirements(cls):
+    def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
         # Since we're calling the plugin, make sure we have the plugin's requirements
         return [
             requirements.ModuleRequirement(
