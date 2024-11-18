@@ -11,7 +11,7 @@ from volatility3.framework.configuration import requirements
 from volatility3.framework.interfaces import plugins
 from volatility3.framework.layers import scanners
 from volatility3.framework.renderers import format_hints
-from volatility3.plugins.windows import pslist, vadyarascan
+from volatility3.plugins.windows import pslist
 
 vollog = logging.getLogger(__name__)
 
@@ -34,9 +34,6 @@ class VadRegExScan(plugins.PluginInterface):
             ),
             requirements.PluginRequirement(
                 name="pslist", plugin=pslist.PsList, version=(2, 0, 0)
-            ),
-            requirements.PluginRequirement(
-                name="vadyarascan", plugin=vadyarascan.VadYaraScan, version=(1, 0, 0)
             ),
             requirements.ListRequirement(
                 name="pid",
@@ -70,7 +67,11 @@ class VadRegExScan(plugins.PluginInterface):
             proc_layer = self.context.layers[proc_layer_name]
 
             # get process sections for scanning
-            sections = vadyarascan.VadYaraScan.get_vad_maps(proc)
+            sections = []
+            for vad in proc.get_vad_root().traverse():
+                base = vad.get_start()
+                if vad.get_size():
+                    sections.append((base, vad.get_size()))
 
             for offset in proc_layer.scan(
                 context=self.context,
