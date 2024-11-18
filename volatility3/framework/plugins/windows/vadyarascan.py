@@ -5,7 +5,8 @@
 import logging
 from typing import Iterable, List, Tuple
 
-from volatility3.framework import interfaces, renderers
+from volatility3.framework import renderers
+from volatility3.framework.interfaces import plugins, configuration, objects
 from volatility3.framework.configuration import requirements
 from volatility3.framework.renderers import format_hints
 from volatility3.plugins import yarascan
@@ -14,14 +15,14 @@ from volatility3.plugins.windows import pslist
 vollog = logging.getLogger(__name__)
 
 
-class VadYaraScan(interfaces.plugins.PluginInterface):
+class VadYaraScan(plugins.PluginInterface):
     """Scans all the Virtual Address Descriptor memory maps using yara."""
 
     _required_framework_version = (2, 4, 0)
     _version = (1, 1, 1)
 
     @classmethod
-    def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
+    def get_requirements(cls) -> List[configuration.RequirementInterface]:
         # create a list of requirements for vadyarascan
         vadyarascan_requirements = [
             requirements.ModuleRequirement(
@@ -112,7 +113,7 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
 
     @staticmethod
     def get_vad_maps(
-        task: interfaces.objects.ObjectInterface,
+        task: objects.ObjectInterface,
     ) -> Iterable[Tuple[int, int]]:
         """Creates a map of start/end addresses within a virtual address
         descriptor tree.
