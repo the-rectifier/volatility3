@@ -104,11 +104,10 @@ class Modules(interfaces.plugins.PluginInterface):
 
             try:
                 BaseDllName = mod.BaseDllName.get_string()
+                if self.config["name"] and self.config["name"] not in BaseDllName:
+                    continue
             except exceptions.InvalidAddressException:
                 BaseDllName = interfaces.renderers.BaseAbsentValue()
-
-            if self.config["name"] and self.config["name"] not in BaseDllName:
-                continue
 
             try:
                 FullDllName = mod.FullDllName.get_string()
