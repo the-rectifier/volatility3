@@ -32,12 +32,12 @@ class PDBRetreiver:
             result = None
             for suffix in [file_name[:-1] + '_', file_name]:
                 try:
-                    logger.debug(f"Attempting to retrieve {url + suffix}")
+                    logger.debug("Attempting to retrieve %s", url + suffix)
                     result, _ = request.urlretrieve(url + suffix)
                 except request.HTTPError as excp:
-                    logger.debug(f"Failed with {excp}")
+                    logger.debug("Failed with %s", excp)
             if result:
-                logger.debug(f"Successfully written to {result}")
+                logger.debug("Successfully written to %s", result)
                 break
         return result
 

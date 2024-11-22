@@ -22,14 +22,14 @@ if (
         )
     )
 
-import importlib
-import inspect
-import logging
-import os
-import traceback
-from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar
+import importlib  # noqa: E402
+import inspect  # noqa: E402
+import logging  # noqa: E402
+import os  # noqa: E402
+import traceback  # noqa: E402
+from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar  # noqa: E402
 
-from volatility3.framework import constants, interfaces
+from volatility3.framework import constants, interfaces  # noqa: E402
 
 
 # ##
@@ -74,7 +74,7 @@ class NonInheritable:
         self.cls = cls
 
     def __get__(self, obj: Any, get_type: Type = None) -> Any:
-        if type == self.cls:
+        if type is self.cls:
             if hasattr(self.default_value, "__get__"):
                 return self.default_value.__get__(obj, get_type)
             return self.default_value

@@ -7,6 +7,7 @@
 # Cleaned up C version (as the basis for my code) here, thanks to Pepijn Bruienne / @bruienne
 # https://gist.github.com/bruienne/029494bbcfb358098b41
 
+import os
 import struct
 import sys
 
@@ -22,7 +23,7 @@ def seekread(f, offset = None, length = 0, relative = True):
 
 def parse_pbzx(pbzx_path):
     section = 0
-    xar_out_path = '%s.part%02d.cpio.xz' % (pbzx_path, section)
+    xar_out_path = f'{pbzx_path}.part{section:02d}.cpio.xz'
     with open(pbzx_path, 'rb') as f:
         # pbzx = f.read()
         # f.close()
@@ -50,12 +51,12 @@ def parse_pbzx(pbzx_path):
                     # ... and split it out ...
                     f_content = seekread(f, length = f_length)
                     section += 1
-                    decomp_out = '%s.part%02d.cpio' % (pbzx_path, section)
+                    decomp_out = f'{pbzx_path}.part{section:02d}.cpio'
                     with open(decomp_out, 'wb') as g:
                         g.write(f_content)
                     # Now to start the next section, which should hopefully be .xz (we'll just assume it is ...)
                     section += 1
-                    xar_out_path = '%s.part%02d.cpio.xz' % (pbzx_path, section)
+                    xar_out_path = f'{pbzx_path}.part{section:02d}.cpio.xz'
                 else:
                     f_length -= 6
                     # This part needs buffering

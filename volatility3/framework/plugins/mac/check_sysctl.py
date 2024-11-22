@@ -60,7 +60,7 @@ class Check_sysctl(plugins.PluginInterface):
         return var_str
 
     def _process_sysctl_list(self, kernel, sysctl_list, recursive=0):
-        if type(sysctl_list) == volatility3.framework.objects.Pointer:
+        if type(sysctl_list) is volatility3.framework.objects.Pointer:
             sysctl_list = sysctl_list.dereference().cast("sysctl_oid_list")
 
         sysctl = sysctl_list.slh_first

@@ -136,3 +136,6 @@ class MultiStringScanner(layers.ScannerInterface):
             )
         for match in re.finditer(self._regex, haystack):
             yield match.start(0), match.group()
+
+
+__all__ = ["multiregexp", "BytesScanner", "RegExScanner", "MultiStringScanner"]

@@ -6,7 +6,7 @@ import sys
 # TODO: Rather nasty hack, when volatility's actually installed this would be unnecessary
 sys.path += ".."
 
-import logging
+import logging  # noqa: E402
 
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
@@ -17,7 +17,7 @@ logger = logging.getLogger("")
 logger.addHandler(console)
 logger.setLevel(logging.DEBUG)
 
-from volatility3 import schemas
+from volatility3 import schemas  # noqa: E402
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("Validates ")

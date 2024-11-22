@@ -3,3 +3,5 @@
 #
 
 from volatility3.framework.configuration import requirements
+
+__all__ = ["requirements"]

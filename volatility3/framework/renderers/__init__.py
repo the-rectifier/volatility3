@@ -430,10 +430,10 @@ class ColumnSortKey(interfaces.renderers.ColumnSortKey):
                 value = datetime.datetime.min
             elif self._type in [int, float]:
                 value = -1
-            elif self._type == bool:
+            elif self._type is bool:
                 value = False
             elif self._type in [str, renderers.Disassembly]:
                 value = "-"
-            elif self._type == bytes:
+            elif self._type is bytes:
                 value = b""
         return value

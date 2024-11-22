@@ -146,7 +146,7 @@ class ShimcacheMem(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterf
             context, layer_name, kernel_symbol_table
         ):
             pid = process.UniqueProcessId
-            vollog.debug("checking process %d" % pid)
+            vollog.debug("checking process %d", pid)
             for vad in vadinfo.VadInfo.list_vads(
                 process, lambda x: x.get_tag() == b"Vad " and x.Protection == 4
             ):
