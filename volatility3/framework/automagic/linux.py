@@ -27,16 +27,6 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
         progress_callback: constants.ProgressCallback = None,
     ) -> Optional[interfaces.layers.DataLayerInterface]:
         """Attempts to identify linux within this layer."""
-        # Version check the SQlite cache
-        required = (1, 0, 0)
-        if not requirements.VersionRequirement.matches_required(
-            required, symbol_cache.SqliteCache.version
-        ):
-            vollog.info(
-                f"SQLiteCache version not suitable: required {required} found {symbol_cache.SqliteCache.version}"
-            )
-            return None
-
         # Bail out by default unless we can stack properly
         layer = context.layers[layer_name]
         join = interfaces.configuration.path_join
@@ -46,12 +36,9 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
         if isinstance(layer, intel.Intel):
             return None
 
-        identifiers_path = os.path.join(
-            constants.CACHE_PATH, constants.IDENTIFIERS_FILENAME
+        linux_banners = symbol_cache.load_cache_manager().get_identifier_dictionary(
+            operating_system="linux"
         )
-        linux_banners = symbol_cache.SqliteCache(
-            identifiers_path
-        ).get_identifier_dictionary(operating_system="linux")
         # If we have no banners, don't bother scanning
         if not linux_banners:
             vollog.info(
