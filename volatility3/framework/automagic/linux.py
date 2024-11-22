@@ -196,5 +196,8 @@ class LinuxSymbolFinder(symbol_finder.SymbolFinder):
     banner_config_key = "kernel_banner"
     operating_system = "linux"
     symbol_class = "volatility3.framework.symbols.linux.LinuxKernelIntermedSymbols"
-    find_aslr = lambda cls, *args: LinuxIntelStacker.find_aslr(*args)[1]
     exclusion_list = ["mac", "windows"]
+
+    @classmethod
+    def find_aslr(cls, *args):
+        return LinuxIntelStacker.find_aslr(*args)[1]
