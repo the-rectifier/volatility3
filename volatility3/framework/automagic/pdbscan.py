@@ -270,6 +270,10 @@ class KernelPDBScanner(interfaces.automagic.AutomagicInterface):
             progress_callback=progress_callback,
         )
         for kernel in kernels:
+            vollog.log(
+                constants.LOGLEVEL_VVVV,
+                f"Testing potential kernel for {kernel.get('pdb_name', 'Unknown')} at {kernel.get('signature_offset', -1)} with MZ offset at {kernel.get('mz_offset', -1)}",
+            )
             valid_kernel = test_kernel(physical_layer_name, virtual_layer_name, kernel)
             if valid_kernel is not None:
                 break
