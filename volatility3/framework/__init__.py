@@ -6,6 +6,14 @@
 import glob
 import sys
 import zipfile
+import importlib
+import inspect
+import logging
+import os
+import traceback
+from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar
+
+from volatility3.framework import constants, interfaces
 
 required_python_version = (3, 8, 0)
 if (
@@ -21,15 +29,6 @@ if (
             *required_python_version
         )
     )
-
-import importlib  # noqa: E402
-import inspect  # noqa: E402
-import logging  # noqa: E402
-import os  # noqa: E402
-import traceback  # noqa: E402
-from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar  # noqa: E402
-
-from volatility3.framework import constants, interfaces  # noqa: E402
 
 
 # ##
