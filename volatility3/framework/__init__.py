@@ -5,29 +5,16 @@
 # Check the python version to ensure it's suitable
 import glob
 import sys
+import volatility3.framework.check_python_version  # noqa: F401
+import zipfile
+import importlib
+import inspect
+import logging
+import os
+import traceback
+from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar
 
-required_python_version = (3, 8, 0)
-if (
-    sys.version_info.major != required_python_version[0]
-    or sys.version_info.minor < required_python_version[1]
-    or (
-        sys.version_info.minor == required_python_version[1]
-        and sys.version_info.micro < required_python_version[2]
-    )
-):
-    raise RuntimeError(
-        f"Volatility framework requires python version {'.'.join(map(str, required_python_version))} or greater"
-    )
-else:
-    import zipfile
-    import importlib
-    import inspect
-    import logging
-    import os
-    import traceback
-    from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar
-
-    from volatility3.framework import constants, interfaces
+from volatility3.framework import constants, interfaces
 
 
 # ##
