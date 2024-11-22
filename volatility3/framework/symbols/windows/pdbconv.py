@@ -128,7 +128,10 @@ class PdbReader:
         self._layer_name, self._context = self.load_pdb_layer(context, location)
         self._dbiheader: Optional[interfaces.objects.ObjectInterface] = None
         if not progress_callback:
-            progress_callback = lambda x, y: None
+
+            def progress_callback(x, y):
+                return None
+
         self._progress_callback = progress_callback
         self.types: List[
             Tuple[

@@ -82,5 +82,4 @@ class Threads(thrdscan.ThrdScan):
             symbol_table=symbol_table_name,
             filter_func=filter_func,
         ):
-            for thread in cls.list_threads(module, proc):
-                yield thread
+            yield from cls.list_threads(module, proc)

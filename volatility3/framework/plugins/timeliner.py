@@ -204,8 +204,7 @@ class Timeliner(interfaces.plugins.PluginInterface):
                 )
                 vollog.log(logging.DEBUG, traceback.format_exc())
 
-        for data_item in sorted(data, key=self._sort_function):
-            yield data_item
+        yield from sorted(data, key=self._sort_function)
 
         # Write out a body file if necessary
         if self.config.get("create-bodyfile", True):

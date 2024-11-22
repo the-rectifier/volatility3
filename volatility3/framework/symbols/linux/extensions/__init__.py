@@ -200,8 +200,7 @@ class module(generic.GenericIntelProcess):
             count=num_sects,
         )
 
-        for attr in arr:
-            yield attr
+        yield from arr
 
     def get_elf_table_name(self):
         elf_table_name = intermed.IntermediateSymbolTable.create(
@@ -237,8 +236,7 @@ class module(generic.GenericIntelProcess):
             count=self.num_symtab + 1,
         )
         if self.section_strtab:
-            for sym in syms:
-                yield sym
+            yield from syms
 
     def get_symbols_names_and_addresses(self) -> Iterable[Tuple[str, int]]:
         """Get names and addresses for each symbol of the module
@@ -2665,8 +2663,7 @@ class IDR(objects.StructType):
         id_storage = linux.IDStorage.choose_id_storage(
             self._context, kernel_module_name="kernel"
         )
-        for page_addr in id_storage.get_entries(root=self.idr_rt):
-            yield page_addr
+        yield from id_storage.get_entries(root=self.idr_rt)
 
     def get_entries(self) -> Iterable[int]:
         """Walks the IDR and yield a pointer associated with each element.
@@ -2684,8 +2681,7 @@ class IDR(objects.StructType):
             # Kernels < 4.11
             get_entries_func = self._old_kernel_get_entries
 
-        for page_addr in get_entries_func():
-            yield page_addr
+        yield from get_entries_func()
 
 
 class rb_root(objects.StructType):

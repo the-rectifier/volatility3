@@ -749,11 +749,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InLoadOrderModuleList.to_list(
+            yield from peb.Ldr.InLoadOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InLoadOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 
@@ -762,11 +761,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InInitializationOrderModuleList.to_list(
+            yield from peb.Ldr.InInitializationOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InInitializationOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 
@@ -775,11 +773,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InMemoryOrderModuleList.to_list(
+            yield from peb.Ldr.InMemoryOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InMemoryOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 

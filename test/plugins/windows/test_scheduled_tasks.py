@@ -84,8 +84,7 @@ class TestActionsDecoding(unittest.TestCase):
             self.assertEqual(actions[0].action_type, scheduled_tasks.ActionType.Exe)
         except Exception:
             self.fail(
-                "ActionDecoder.decode should not raise exception:\n%s"
-                % traceback.format_exc()
+                f"ActionDecoder.decode should not raise exception:\n{traceback.format_exc()}"
             )
 
 

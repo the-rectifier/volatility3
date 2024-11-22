@@ -152,7 +152,9 @@ class Maps(interfaces.plugins.PluginInterface):
         address_list = self.config.get("address", None)
         if not address_list:
             # do not filter as no address_list was supplied
-            vma_filter_func = lambda _: True
+            def vma_filter_func(_):
+                return True
+
         else:
             # filter for any vm_start that matches the supplied address config
             def vma_filter_function(task: interfaces.objects.ObjectInterface) -> bool:

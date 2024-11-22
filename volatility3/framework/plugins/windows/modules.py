@@ -248,8 +248,7 @@ class Modules(interfaces.plugins.PluginInterface):
             object_type=type_name, offset=list_entry.vol.offset - reloff, absolute=True
         )
 
-        for mod in module.InLoadOrderLinks:
-            yield mod
+        yield from module.InLoadOrderLinks
 
     def run(self):
         return renderers.TreeGrid(

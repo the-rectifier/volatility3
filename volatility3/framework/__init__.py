@@ -97,8 +97,7 @@ def class_subclasses(cls: Type[T]) -> Generator[Type[T], None, None]:
         # The typing system is not clever enough to realize that clazz has a hidden attr after the hasattr check
         if not hasattr(clazz, "hidden") or not clazz.hidden:  # type: ignore
             yield clazz
-        for return_value in class_subclasses(clazz):
-            yield return_value
+        yield from class_subclasses(clazz)
 
 
 def import_files(base_module, ignore_errors: bool = False) -> List[str]:
@@ -159,9 +158,9 @@ def import_files(base_module, ignore_errors: bool = False) -> List[str]:
 
 def _filter_files(filename: str):
     """Ensures that a filename traversed is an importable python file"""
-    return (
-        filename.endswith(".py") or filename.endswith(".pyc")
-    ) and not filename.startswith("__")
+    return (filename.endswith((".py", ".pyc"))) and not filename.startswith(
+        "__"
+    )
 
 
 def import_file(module: str, path: str, ignore_errors: bool = False) -> List[str]:

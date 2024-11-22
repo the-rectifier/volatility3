@@ -227,8 +227,7 @@ class Handles(interfaces.plugins.PluginInterface):
 
         for entry in table:
             if level > 0:
-                for x in self._make_handle_array(entry, level - 1, depth):
-                    yield x
+                yield from self._make_handle_array(entry, level - 1, depth)
                 depth += 1
             else:
                 handle_multiplier = 4
@@ -264,8 +263,7 @@ class Handles(interfaces.plugins.PluginInterface):
             )
             return None
 
-        for handle_table_entry in self._make_handle_array(TableCode, table_levels):
-            yield handle_table_entry
+        yield from self._make_handle_array(TableCode, table_levels)
 
     def _generator(self, procs):
         kernel = self.context.modules[self.config["kernel"]]

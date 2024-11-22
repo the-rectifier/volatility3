@@ -372,7 +372,7 @@ class SockHandlers(interfaces.configuration.VersionableInterface):
         bt_sock = sock.cast("bt_sock")
 
         def bt_addr(addr):
-            return ":".join(reversed(["%02x" % x for x in addr.b]))
+            return ":".join(reversed([f"{x:02x}" for x in addr.b]))
 
         src_addr = src_port = dst_addr = dst_port = None
         bt_protocol = bt_sock.get_protocol()

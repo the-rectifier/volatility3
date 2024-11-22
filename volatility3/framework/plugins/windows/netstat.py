@@ -488,14 +488,13 @@ class NetStat(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
         """
 
         # first, TCP endpoints by parsing the partition table
-        for endpoint in cls.parse_partitions(
+        yield from cls.parse_partitions(
             context,
             layer_name,
             net_symbol_table,
             tcpip_symbol_table,
             tcpip_module_offset,
-        ):
-            yield endpoint
+        )
 
         # then, towards the UDP and TCP port pools
         # first, find their addresses
