@@ -5,7 +5,7 @@
 # Check the python version to ensure it's suitable
 import glob
 import sys
-import volatility3.framework.check_python_version  # noqa: F401
+from volatility3.framework import check_python_version as check_python_version
 import zipfile
 import importlib
 import inspect

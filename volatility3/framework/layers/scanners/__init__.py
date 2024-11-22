@@ -5,7 +5,7 @@ import re
 from typing import Generator, List, Tuple, Dict, Optional
 
 from volatility3.framework.interfaces import layers
-from volatility3.framework.layers.scanners import multiregexp
+from volatility3.framework.layers.scanners import multiregexp as multiregexp
 
 
 class BytesScanner(layers.ScannerInterface):
@@ -136,6 +136,3 @@ class MultiStringScanner(layers.ScannerInterface):
             )
         for match in re.finditer(self._regex, haystack):
             yield match.start(0), match.group()
-
-
-__all__ = ["multiregexp", "BytesScanner", "RegExScanner", "MultiStringScanner"]

@@ -2,6 +2,4 @@
 # which is available at https://www.volatilityfoundation.org/license/vsl-v1.0
 #
 
-from volatility3.framework.configuration import requirements
-
-__all__ = ["requirements"]
+from volatility3.framework.configuration import requirements as requirements
