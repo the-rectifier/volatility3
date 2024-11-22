@@ -106,9 +106,7 @@ class Malfind(interfaces.plugins.PluginInterface):
             proc_layer_name = proc.add_process_layer()
         except exceptions.InvalidAddressException as excp:
             vollog.debug(
-                "Process {}: invalid address {} in layer {}".format(
-                    proc_id, excp.invalid_address, excp.layer_name
-                )
+                f"Process {proc_id}: invalid address {excp.invalid_address} in layer {excp.layer_name}"
             )
             return None
 
@@ -211,9 +209,7 @@ class Malfind(interfaces.plugins.PluginInterface):
                         file_output = file_handle.preferred_filename
                     except (exceptions.InvalidAddressException, OverflowError) as excp:
                         vollog.debug(
-                            "Unable to dump PE with pid {0}.{1:#x}: {2}".format(
-                                proc.UniqueProcessId, vad.get_start(), excp
-                            )
+                            f"Unable to dump PE with pid {proc.UniqueProcessId}.{vad.get_start():#x}: {excp}"
                         )
 
                 yield (

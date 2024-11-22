@@ -177,9 +177,7 @@ class Modules(interfaces.plugins.PluginInterface):
             except exceptions.InvalidAddressException:
                 vollog.log(
                     constants.LOGLEVEL_VVV,
-                    "Process {} does not have a valid Session or a layer could not be constructed for it".format(
-                        proc_id
-                    ),
+                    f"Process {proc_id} does not have a valid Session or a layer could not be constructed for it",
                 )
                 continue
 

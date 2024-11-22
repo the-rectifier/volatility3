@@ -311,9 +311,7 @@ class NetStat(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
         part_table.Partitions.count = part_count
 
         vollog.debug(
-            "Found TCP connection PartitionTable @ 0x{:x} (partition count: {})".format(
-                part_table_addr, part_count
-            )
+            f"Found TCP connection PartitionTable @ 0x{part_table_addr:x} (partition count: {part_count})"
         )
         entry_offset = context.symbol_space.get_type(obj_name).relative_child_offset(
             "ListEntry"
@@ -624,9 +622,7 @@ class NetStat(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                     proto = "TCPv6"
                 else:
                     vollog.debug(
-                        "TCP Endpoint @ 0x{:2x} has unknown address family 0x{:x}".format(
-                            netw_obj.vol.offset, netw_obj.get_address_family()
-                        )
+                        f"TCP Endpoint @ 0x{netw_obj.vol.offset:2x} has unknown address family 0x{netw_obj.get_address_family():x}"
                     )
                     proto = "TCPv?"
 

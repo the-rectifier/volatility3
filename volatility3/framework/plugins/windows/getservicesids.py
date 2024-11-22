@@ -55,7 +55,7 @@ class GetServiceSIDs(interfaces.plugins.PluginInterface):
             )
 
         # Get service sids dictionary (we need only the service sids).
-        with open(sids_json_file_name, "r") as file_handle:
+        with open(sids_json_file_name) as file_handle:
             self.servicesids = json.load(file_handle)["service sids"]
 
     @classmethod

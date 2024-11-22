@@ -56,9 +56,7 @@ def require_interface_version(*args) -> None:
     if len(args):
         if args[0] != interface_version()[0]:
             raise RuntimeError(
-                "Framework interface version {} is incompatible with required version {}".format(
-                    interface_version()[0], args[0]
-                )
+                f"Framework interface version {interface_version()[0]} is incompatible with required version {args[0]}"
             )
         if len(args) > 1:
             if args[1] > interface_version()[1]:
@@ -70,7 +68,7 @@ def require_interface_version(*args) -> None:
                 )
 
 
-class NonInheritable(object):
+class NonInheritable:
     def __init__(self, value: Any, cls: Type) -> None:
         self.default_value = value
         self.cls = cls
@@ -187,9 +185,7 @@ def import_file(module: str, path: str, ignore_errors: bool = False) -> List[str
                     traceback.TracebackException.from_exception(e).format(chain=True)
                 )
             )
-            vollog.debug(
-                "Failed to import module {} based on file: {}".format(module, path)
-            )
+            vollog.debug(f"Failed to import module {module} based on file: {path}")
             failures.append(module)
             if not ignore_errors:
                 raise

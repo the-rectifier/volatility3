@@ -184,7 +184,7 @@ class MacIntelStacker(interfaces.automagic.StackerLayerInterface):
         aslr_shift = 0
 
         for offset, banner in offset_generator:
-            banner_major, banner_minor = [int(x) for x in banner[22:].split(b".")[0:2]]
+            banner_major, banner_minor = (int(x) for x in banner[22:].split(b".")[0:2])
 
             tmp_aslr_shift = offset - cls.virtual_to_physical_address(
                 version_json_address

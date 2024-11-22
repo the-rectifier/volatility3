@@ -585,7 +585,6 @@ class NullFileHandler(io.BytesIO, interfaces.plugins.FileHandlerInterface):
 
     def writelines(self, lines: Iterable[bytes]):
         """Dummy method"""
-        pass
 
     def write(self, b: bytes):
         """Dummy method"""

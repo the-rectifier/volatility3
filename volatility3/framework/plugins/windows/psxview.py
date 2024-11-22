@@ -14,7 +14,6 @@ from volatility3.plugins.windows import (
     info,
     pslist,
     psscan,
-    sessions,
     thrdscan,
 )
 

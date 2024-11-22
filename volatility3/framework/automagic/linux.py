@@ -173,9 +173,7 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
             if aslr_shift & 0xFFF != 0 or kaslr_shift & 0xFFF != 0:
                 continue
             vollog.debug(
-                "Linux ASLR shift values determined: physical {:0x} virtual {:0x}".format(
-                    kaslr_shift, aslr_shift
-                )
+                f"Linux ASLR shift values determined: physical {kaslr_shift:0x} virtual {aslr_shift:0x}"
             )
             return kaslr_shift, aslr_shift
 

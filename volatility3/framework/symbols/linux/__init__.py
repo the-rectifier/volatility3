@@ -798,7 +798,7 @@ class RadixTree(IDStorage):
         return True
 
 
-class PageCache(object):
+class PageCache:
     """Linux Page Cache abstraction"""
 
     def __init__(

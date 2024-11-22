@@ -145,8 +145,7 @@ class PDBConvertor:
         """Generates the metadata necessary for this object"""
         dbg = self._pdb.STREAM_DBI
         last_bytes = str(binascii.hexlify(self._pdb.STREAM_PDB.GUID.Data4), 'ascii')[-16:]
-        guidstr = u'{:08x}{:04x}{:04x}{}'.format(self._pdb.STREAM_PDB.GUID.Data1, self._pdb.STREAM_PDB.GUID.Data2,
-                                                 self._pdb.STREAM_PDB.GUID.Data3, last_bytes)
+        guidstr = f'{self._pdb.STREAM_PDB.GUID.Data1:08x}{self._pdb.STREAM_PDB.GUID.Data2:04x}{self._pdb.STREAM_PDB.GUID.Data3:04x}{last_bytes}'
         pdb_data = {
             "GUID": guidstr.upper(),
             "age": self._pdb.STREAM_PDB.Age,
@@ -195,7 +194,7 @@ class PDBConvertor:
         try:
             sects = self._pdb.STREAM_SECT_HDR_ORIG.sections
             omap = self._pdb.STREAM_OMAP_FROM_SRC
-        except AttributeError as e:
+        except AttributeError:
             # In this case there is no OMAP, so we use the given section
             # headers and use the identity function for omap.remap
             sects = self._pdb.STREAM_SECT_HDR.sections

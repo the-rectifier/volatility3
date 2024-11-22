@@ -1469,7 +1469,7 @@ class mount(objects.StructType):
 
     def next_peer(self):
         table_name = self.vol.type_name.split(constants.BANG)[0]
-        mount_struct = "{0}{1}mount".format(table_name, constants.BANG)
+        mount_struct = f"{table_name}{constants.BANG}mount"
         offset = self._context.symbol_space.get_type(
             mount_struct
         ).relative_child_offset("mnt_share")
@@ -2487,7 +2487,7 @@ class address_space(objects.StructType):
 
 class page(objects.StructType):
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def pageflags_enum(self) -> Dict:
         """Returns 'pageflags' enumeration key/values
 

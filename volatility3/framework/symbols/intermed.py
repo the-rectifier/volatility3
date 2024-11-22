@@ -171,7 +171,7 @@ class IntermediateSymbolTable(interfaces.symbols.SymbolTableInterface):
         (indicating that only additive   changes have been made) than
         the consumer (in this case, the file reader).
         """
-        major, minor, patch = [int(x) for x in version.split(".")]
+        major, minor, patch = (int(x) for x in version.split("."))
         supported_versions = [x for x in versions if x[0] == major and x[1] >= minor]
         if not supported_versions:
             raise ValueError(

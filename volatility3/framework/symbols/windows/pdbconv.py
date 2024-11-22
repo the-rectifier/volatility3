@@ -263,9 +263,7 @@ class PdbReader:
             )
         if header.index_max < header.index_min:
             raise ValueError(
-                "Maximum {} index is smaller than minimum TPI index, found: {} < {} ".format(
-                    stream_name, header.index_max, header.index_min
-                )
+                f"Maximum {stream_name} index is smaller than minimum TPI index, found: {header.index_max} < {header.index_min} "
             )
         # Reset the state
         info_references: Dict[str, int] = {}
@@ -976,7 +974,7 @@ class PdbRetreiver:
 if __name__ == "__main__":
     import argparse
 
-    class PrintedProgress(object):
+    class PrintedProgress:
         """A progress handler that prints the progress value and the
         description onto the command line."""
 

@@ -133,7 +133,7 @@ class PsScan(interfaces.plugins.PluginInterface):
             )
         elif len(kernel_layer.dependencies) == 0:
             vollog.error(
-                f"Kernel layer has no dependencies, meaning there is no memory layer for this plugin to scan."
+                "Kernel layer has no dependencies, meaning there is no memory layer for this plugin to scan."
             )
             raise exceptions.LayerException(
                 kernel_layer_name, f"Layer {kernel_layer_name} has no dependencies"

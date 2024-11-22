@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     schema = None
     if args.schema:
-        with open(os.path.abspath(args.schema), 'r') as s:
+        with open(os.path.abspath(args.schema)) as s:
             schema = json.load(s)
 
     failures = []
@@ -36,7 +36,7 @@ if __name__ == '__main__':
         try:
             if os.path.exists(filename):
                 print(f"[?] Validating file: {filename}")
-                with open(filename, 'r') as t:
+                with open(filename) as t:
                     test = json.load(t)
 
                 if args.schema:

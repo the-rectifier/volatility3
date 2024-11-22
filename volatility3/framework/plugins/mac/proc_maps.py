@@ -115,9 +115,7 @@ class Maps(interfaces.plugins.PluginInterface):
             proc_layer_name = task.add_process_layer()
         except exceptions.InvalidAddressException as excp:
             vollog.debug(
-                "Process {}: invalid address {} in layer {}".format(
-                    pid, excp.invalid_address, excp.layer_name
-                )
+                f"Process {pid}: invalid address {excp.invalid_address} in layer {excp.layer_name}"
             )
             return None
         vm_size = vm_end - vm_start

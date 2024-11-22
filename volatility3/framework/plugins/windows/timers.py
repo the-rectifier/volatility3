@@ -141,7 +141,7 @@ class Timers(interfaces.plugins.PluginInterface):
                 if dpc.DeferredRoutine == 0:
                     continue
                 deferred_routine = dpc.DeferredRoutine
-            except Exception as e:
+            except Exception:
                 continue
 
             module_symbols = list(

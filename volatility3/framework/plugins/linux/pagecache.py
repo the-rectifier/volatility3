@@ -462,7 +462,7 @@ class InodePages(plugins.PluginInterface):
                     f.seek(current_fp)
                     f.write(page_bytes)
 
-        except IOError as e:
+        except OSError as e:
             vollog.error("Unable to write to file (%s): %s", filename, e)
 
     def _generator(self):

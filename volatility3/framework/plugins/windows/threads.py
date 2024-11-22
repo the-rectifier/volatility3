@@ -3,7 +3,7 @@
 #
 
 import logging
-from typing import Callable, Iterable, List, Generator
+from typing import Iterable, List, Generator
 
 from volatility3.framework import interfaces, constants
 from volatility3.framework.configuration import requirements

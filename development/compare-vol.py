@@ -101,7 +101,7 @@ class Volatility2Test(VolatilityTest):
             print(f"    Tested  volatility2 imageinfo with image {image.filepath}: {end_time - start_time}")
             with open(os.path.join(self.output_directory, f'vol2_imageinfo_{image_hash}_stdout'), "wb") as f:
                 f.write(vol2_completed.stdout)
-            image.vol2_profile = re.search(b"Suggested Profile\(s\) : ([^,]+)", vol2_completed.stdout)[1]
+            image.vol2_profile = re.search(rb"Suggested Profile\(s\) : ([^,]+)", vol2_completed.stdout)[1]
 
 
 class RekallTest(VolatilityTest):

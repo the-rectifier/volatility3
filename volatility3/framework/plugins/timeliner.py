@@ -143,9 +143,7 @@ class Timeliner(interfaces.plugins.PluginInterface):
                     times = self.timeline.get((plugin_name, item), {})
                     if times.get(timestamp_type, None) is not None:
                         vollog.debug(
-                            "Multiple timestamps for the same plugin/file combination found: {} {}".format(
-                                plugin_name, item
-                            )
+                            f"Multiple timestamps for the same plugin/file combination found: {plugin_name} {item}"
                         )
                     times[timestamp_type] = timestamp
                     self.timeline[(plugin_name, item)] = times

@@ -73,7 +73,7 @@ class ROW(objects.StructType):
                     )
                     for i in range(0, len(char_row), 3)
                 )
-        except Exception as e:
+        except Exception:
             line = ""
 
         if truncate:
