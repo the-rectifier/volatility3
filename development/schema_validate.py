@@ -1,12 +1,11 @@
 import argparse
 import json
+import logging
 import os
 import sys
 
 # TODO: Rather nasty hack, when volatility's actually installed this would be unnecessary
 sys.path += ".."
-
-import logging  # noqa: E402
 
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
