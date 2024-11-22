@@ -68,7 +68,8 @@ LOGLEVEL_VVVV = 6
 
 
 CACHE_PATH = os.path.join(
-    os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache"), "volatility3"
+    os.environ.get("XDG_CACHE_HOME") or os.path.join(os.path.expanduser("~"), ".cache"),
+    "volatility3",
 )
 """Default path to store cached data"""
 
