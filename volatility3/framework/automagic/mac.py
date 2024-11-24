@@ -3,13 +3,11 @@
 #
 
 import logging
-import os
 import struct
 from typing import Optional
 
 from volatility3.framework import constants, exceptions, interfaces, layers
 from volatility3.framework.automagic import symbol_cache, symbol_finder
-from volatility3.framework.configuration import requirements
 from volatility3.framework.layers import intel, scanners
 from volatility3.framework.symbols import mac
 
