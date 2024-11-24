@@ -161,7 +161,7 @@ class NetScan(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
             raise NotImplementedError(
                 "Kernel Debug Structure version format not supported!"
             )
-        except:  # noqa: E722
+        except Exception:
             # unsure what to raise here. Also, it might be useful to add some kind of fallback,
             # either to a user-provided version or to another method to determine tcpip.sys's version
             raise exceptions.VolatilityException(
