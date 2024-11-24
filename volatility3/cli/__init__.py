@@ -88,7 +88,7 @@ class MuteProgress(PrintedProgress):
 class CommandLine:
     """Constructs a command-line interface object for users to run plugins."""
 
-    CLI_NAME = os.path.basename(sys.argv[0]) # vol or volatility
+    CLI_NAME = os.path.basename(sys.argv[0])  # vol or volatility
 
     def __init__(self):
         self.setup_logging()
@@ -386,7 +386,9 @@ class CommandLine:
             argcomplete.autocomplete(parser)
         args = parser.parse_args()
         if args.plugin is None:
-            parser.error(f"Please select a plugin to run (see '{self.CLI_NAME} --help' for options")
+            parser.error(
+                f"Please select a plugin to run (see '{self.CLI_NAME} --help' for options"
+            )
 
         vollog.log(
             constants.LOGLEVEL_VVV, f"Cache directory used: {constants.CACHE_PATH}"
