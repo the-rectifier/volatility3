@@ -29,7 +29,7 @@ except ImportError:
 
 try:
     # Import so that the handler is found by the framework.class_subclasses callc
-    import smb.SMBHandler  # lgtm [py/unused-import]  # noqa: F401
+    from smb import SMBHandler as SMBHandler
 except ImportError:
     # If we fail to import this, it means that SMB handling won't be available
     pass
