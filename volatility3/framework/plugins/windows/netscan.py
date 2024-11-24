@@ -162,7 +162,7 @@ class NetScan(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                 "Kernel Debug Structure version format not supported!"
             )
         except Exception:
-            # unsure what to raise here. Also, it might be useful to add some kind of fallback,
+            # FIXME: unsure what to raise here. Also, it might be useful to add some kind of fallback,
             # either to a user-provided version or to another method to determine tcpip.sys's version
             raise exceptions.VolatilityException(
                 "Kernel Debug Structure missing VERSION/KUSER structure, unable to determine Windows version!"
