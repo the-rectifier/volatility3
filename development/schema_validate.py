@@ -9,7 +9,7 @@ sys.path += ".."
 
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(levelname)-8s %(name)-12s: %(message)s')
+formatter = logging.Formatter("%(levelname)-8s %(name)-12s: %(message)s")
 console.setFormatter(formatter)
 
 logger = logging.getLogger("")
@@ -18,10 +18,10 @@ logger.setLevel(logging.DEBUG)
 
 from volatility3 import schemas  # noqa: E402
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser("Validates ")
-    parser.add_argument("-s", "--schema", dest = "schema", default = None)
-    parser.add_argument("filenames", metavar = "FILE", nargs = '+')
+    parser.add_argument("-s", "--schema", dest="schema", default=None)
+    parser.add_argument("filenames", metavar="FILE", nargs="+")
 
     args = parser.parse_args()
 

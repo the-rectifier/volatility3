@@ -2,8 +2,10 @@ import sys
 import struct
 import traceback
 import unittest
+
 sys.path.insert(0, "../../volatility3")
 from volatility3.plugins.windows import scheduled_tasks
+
 
 class TestActionsDecoding(unittest.TestCase):
     def test_decode_exe_action(self):
