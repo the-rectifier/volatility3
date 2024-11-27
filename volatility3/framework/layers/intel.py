@@ -569,7 +569,7 @@ class LinuxMixin(Intel):
 
     def _protnone_mask(self, entry: int) -> int:
         """Gets a mask to XOR with the page table entry to get the correct PFN"""
-        return ~0 & self._register_mask if self._pte_needs_invert(entry) else 0
+        return self._register_mask if self._pte_needs_invert(entry) else 0
 
     def _pte_pfn(self, entry: int) -> int:
         """Extracts the page frame number from the page table entry"""
