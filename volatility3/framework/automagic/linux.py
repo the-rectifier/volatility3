@@ -3,7 +3,7 @@
 #
 
 import logging
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple
 
 from volatility3.framework import constants, interfaces
 from volatility3.framework.automagic import symbol_cache, symbol_finder
