@@ -563,8 +563,9 @@ class LinuxMixin(Intel):
         return self._is_pte_present(entry)
 
     def _pte_needs_invert(self, entry) -> bool:
-        # Entries that were set to PROT_NONE (PAGE_PRESENT/PAGE_GLOBAL) are inverted
-        return not (entry & self._PAGE_PRESENT)
+        # Entries that were set to PROT_NONE (PAGE_PRESENT) are inverted
+        # A clear PTE shouldn't be inverted. See f19f5c4
+        return entry and not (entry & self._PAGE_PRESENT)
 
     def _protnone_mask(self, entry: int) -> int:
         """Gets a mask to XOR with the page table entry to get the correct PFN"""
