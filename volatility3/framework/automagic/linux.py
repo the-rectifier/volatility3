@@ -67,14 +67,14 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
                     context, table_name, layer_name, progress_callback=progress_callback
                 )
 
-                layer_class: Type = intel.Intel
                 if "init_top_pgt" in table.symbols:
-                    layer_class = intel.Intel32e
+                    layer_class = intel.LinuxIntel32e
                     dtb_symbol_name = "init_top_pgt"
                 elif "init_level4_pgt" in table.symbols:
-                    layer_class = intel.Intel32e
+                    layer_class = intel.LinuxIntel32e
                     dtb_symbol_name = "init_level4_pgt"
                 else:
+                    layer_class = intel.LinuxIntel
                     dtb_symbol_name = "swapper_pg_dir"
 
                 dtb = cls.virtual_to_physical_address(
