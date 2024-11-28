@@ -16,7 +16,7 @@ class Boottime(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface)
 
     _required_framework_version = (2, 11, 0)
 
-    _version = (1, 0, 0)
+    _version = (1, 0, 1)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -27,7 +27,7 @@ class Boottime(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface)
                 architectures=["Intel32", "Intel64"],
             ),
             requirements.PluginRequirement(
-                name="pslist", plugin=pslist.PsList, version=(2, 3, 0)
+                name="pslist", plugin=pslist.PsList, version=(3, 0, 0)
             ),
         ]
 
