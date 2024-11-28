@@ -142,11 +142,11 @@ class SymbolFinder(interfaces.automagic.AutomagicInterface):
             )
 
         for _, banner in banner_list:
-            vollog.debug(f"Identified banner: {repr(banner)}")
-            symbol_files = self.banners.get(banner, None)
-            if symbol_files:
-                isf_path = symbol_files
-                vollog.debug(f"Using symbol library: {symbol_files}")
+            vollog.debug(f"Identified banner: {banner!r}")
+            symbols_file = self.banners.get(banner, None)
+            if symbols_file:
+                isf_path = symbols_file
+                vollog.debug(f"Using symbol library: {symbols_file}")
                 clazz = self.symbol_class
                 # Set the discovered options
                 path_join = interfaces.configuration.path_join
@@ -160,8 +160,29 @@ class SymbolFinder(interfaces.automagic.AutomagicInterface):
                     path_join(config_path, requirement.name, "symbol_mask")
                 ] = layer.address_mask
 
+                # Keep track of the existing table names so we know which ones were added
+                old_table_names = set(context.symbol_space._dict)
+
                 # Construct the appropriate symbol table
                 requirement.construct(context, config_path)
+
+                new_table_names = context.symbol_space._dict.keys() - old_table_names
+                # It should add only one symbol table. Ignore the next steps if it doesn't
+                if len(new_table_names) == 1:
+                    new_table_name = new_table_names.pop()
+                    symbol_table = context.symbol_space._dict[new_table_name]
+                    producer = symbol_table.producer
+                    vollog.debug(
+                        f"producer_name: {producer.name}, producer_version: {producer.version_string}"
+                    )
+                    for category in symbol_table.metadata._json_data:
+                        vollog.debug(f"{category}:")
+                        for subkey in symbol_table.metadata._json_data[category]:
+                            subkey_item = ", ".join(
+                                f"{key}: '{value}'" for key, value in subkey.items()
+                            )
+                            vollog.debug(f"\t{subkey_item}")
+
                 break
             else:
                 vollog.debug(f"Symbol library path not found for: {banner}")

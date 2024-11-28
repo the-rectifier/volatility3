@@ -19,9 +19,16 @@ class ProducerMetadata(interfaces.symbols.MetadataInterface):
         return self._json_data.get("name", None)
 
     @property
+    def version_string(self) -> str:
+        """Returns the ISF file producer's version as a string.
+        If no version is present, an empty string is returned.
+        """
+        return self._json_data.get("version", "")
+
+    @property
     def version(self) -> Optional[Tuple[int]]:
         """Returns the version of the ISF file producer"""
-        version = self._json_data.get("version", None)
+        version = self.version_string()
         if not version:
             return None
         if all(x in "0123456789." for x in version):
@@ -81,3 +88,7 @@ class WindowsMetadata(interfaces.symbols.MetadataInterface):
 
 class LinuxMetadata(interfaces.symbols.MetadataInterface):
     """Class to handle the metadata from a Linux symbol table."""
+
+
+class MacMetadata(interfaces.symbols.MetadataInterface):
+    """Class to handle the metadata from a Mac symbol table."""
