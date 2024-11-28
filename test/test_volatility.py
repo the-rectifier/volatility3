@@ -61,7 +61,7 @@ def runvol_plugin(plugin, img, volatility, python, pluginargs=[], globalargs=[])
 
 
 def test_windows_pslist(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.pslist.PsList", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.pslist.PsList", image, volatility, python)
     out = out.lower()
     assert out.find(b"system") != -1
     assert out.find(b"csrss.exe") != -1
@@ -69,7 +69,7 @@ def test_windows_pslist(image, volatility, python):
     assert out.count(b"\n") > 10
     assert rc == 0
 
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.pslist.PsList", image, volatility, python, pluginargs=["--pid", "4"]
     )
     out = out.lower()
@@ -79,7 +79,7 @@ def test_windows_pslist(image, volatility, python):
 
 
 def test_windows_psscan(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.psscan.PsScan", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.psscan.PsScan", image, volatility, python)
     out = out.lower()
     assert out.find(b"system") != -1
     assert out.find(b"csrss.exe") != -1
@@ -89,21 +89,21 @@ def test_windows_psscan(image, volatility, python):
 
 
 def test_windows_dlllist(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.dlllist.DllList", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.dlllist.DllList", image, volatility, python)
     out = out.lower()
     assert out.count(b"\n") > 10
     assert rc == 0
 
 
 def test_windows_modules(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.modules.Modules", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.modules.Modules", image, volatility, python)
     out = out.lower()
     assert out.count(b"\n") > 10
     assert rc == 0
 
 
 def test_windows_hivelist(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.registry.hivelist.HiveList", image, volatility, python
     )
     out = out.lower()
@@ -136,7 +136,7 @@ def test_windows_dumpfiles(image, volatility, python):
 
             path = tempfile.mkdtemp()
 
-            rc, out, err = runvol_plugin(
+            rc, _out, _err = runvol_plugin(
                 "windows.dumpfiles.DumpFiles",
                 image,
                 volatility,
@@ -166,7 +166,7 @@ def test_windows_dumpfiles(image, volatility, python):
 
 
 def test_windows_handles(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.handles.Handles", image, volatility, python, pluginargs=["--pid", "4"]
     )
 
@@ -183,7 +183,7 @@ def test_windows_handles(image, volatility, python):
 
 
 def test_windows_svcscan(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.svcscan.SvcScan", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.svcscan.SvcScan", image, volatility, python)
 
     assert out.find(b"Microsoft ACPI Driver") != -1
     assert out.count(b"\n") > 250
@@ -191,17 +191,19 @@ def test_windows_svcscan(image, volatility, python):
 
 
 def test_windows_thrdscan(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.thrdscan.ThrdScan", image, volatility, python)
+    rc, out, _err = runvol_plugin(
+        "windows.thrdscan.ThrdScan", image, volatility, python
+    )
     # find pid 4 (of system process) which starts with lowest tids
     assert out.find(b"\t4\t8") != -1
     assert out.find(b"\t4\t12") != -1
     assert out.find(b"\t4\t16") != -1
-    #assert out.find(b"this raieses AssertionError") != -1
+    # assert out.find(b"this raieses AssertionError") != -1
     assert rc == 0
 
 
 def test_windows_privileges(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.privileges.Privs", image, volatility, python, pluginargs=["--pid", "4"]
     )
 
@@ -213,7 +215,7 @@ def test_windows_privileges(image, volatility, python):
 
 
 def test_windows_getsids(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.getsids.GetSIDs", image, volatility, python, pluginargs=["--pid", "4"]
     )
 
@@ -225,7 +227,7 @@ def test_windows_getsids(image, volatility, python):
 
 
 def test_windows_envars(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.envars.Envars", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.envars.Envars", image, volatility, python)
 
     assert out.find(b"PATH") != -1
     assert out.find(b"PROCESSOR_ARCHITECTURE") != -1
@@ -237,7 +239,7 @@ def test_windows_envars(image, volatility, python):
 
 
 def test_windows_callbacks(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.callbacks.Callbacks", image, volatility, python
     )
 
@@ -249,7 +251,7 @@ def test_windows_callbacks(image, volatility, python):
 
 
 def test_windows_vadwalk(image, volatility, python):
-    rc, out, err = runvol_plugin("windows.vadwalk.VadWalk", image, volatility, python)
+    rc, out, _err = runvol_plugin("windows.vadwalk.VadWalk", image, volatility, python)
 
     assert out.find(b"Vad") != -1
     assert out.find(b"VadS") != -1
@@ -260,7 +262,7 @@ def test_windows_vadwalk(image, volatility, python):
 
 
 def test_windows_devicetree(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "windows.devicetree.DeviceTree", image, volatility, python
     )
 
@@ -277,7 +279,7 @@ def test_windows_devicetree(image, volatility, python):
 
 
 def test_linux_pslist(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.pslist.PsList", image, volatility, python)
+    rc, out, _err = runvol_plugin("linux.pslist.PsList", image, volatility, python)
     out = out.lower()
 
     assert (out.find(b"init") != -1) or (out.find(b"systemd") != -1)
@@ -287,7 +289,9 @@ def test_linux_pslist(image, volatility, python):
 
 
 def test_linux_check_idt(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.check_idt.Check_idt", image, volatility, python)
+    rc, out, _err = runvol_plugin(
+        "linux.check_idt.Check_idt", image, volatility, python
+    )
     out = out.lower()
 
     assert out.count(b"__kernel__") >= 10
@@ -296,7 +300,7 @@ def test_linux_check_idt(image, volatility, python):
 
 
 def test_linux_check_syscall(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "linux.check_syscall.Check_syscall", image, volatility, python
     )
     out = out.lower()
@@ -308,7 +312,7 @@ def test_linux_check_syscall(image, volatility, python):
 
 
 def test_linux_lsmod(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.lsmod.Lsmod", image, volatility, python)
+    rc, out, _err = runvol_plugin("linux.lsmod.Lsmod", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"\n") > 10
@@ -316,7 +320,7 @@ def test_linux_lsmod(image, volatility, python):
 
 
 def test_linux_lsof(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.lsof.Lsof", image, volatility, python)
+    rc, out, _err = runvol_plugin("linux.lsof.Lsof", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"socket:") >= 10
@@ -325,7 +329,7 @@ def test_linux_lsof(image, volatility, python):
 
 
 def test_linux_proc_maps(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.proc.Maps", image, volatility, python)
+    rc, out, _err = runvol_plugin("linux.proc.Maps", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"anonymous mapping") >= 10
@@ -334,15 +338,18 @@ def test_linux_proc_maps(image, volatility, python):
 
 
 def test_linux_tty_check(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.tty_check.tty_check", image, volatility, python)
+    rc, out, _err = runvol_plugin(
+        "linux.tty_check.tty_check", image, volatility, python
+    )
     out = out.lower()
 
     assert out.find(b"__kernel__") != -1
     assert out.count(b"\n") >= 5
     assert rc == 0
 
+
 def test_linux_sockstat(image, volatility, python):
-    rc, out, err = runvol_plugin("linux.sockstat.Sockstat", image, volatility, python)
+    rc, out, _err = runvol_plugin("linux.sockstat.Sockstat", image, volatility, python)
 
     assert out.count(b"AF_UNIX") >= 354
     assert out.count(b"AF_BLUETOOTH") >= 5
@@ -354,7 +361,7 @@ def test_linux_sockstat(image, volatility, python):
 
 
 def test_linux_library_list(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "linux.library_list.LibraryList", image, volatility, python
     )
 
@@ -383,7 +390,7 @@ def test_linux_library_list(image, volatility, python):
 
 
 def test_mac_pslist(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.pslist.PsList", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.pslist.PsList", image, volatility, python)
     out = out.lower()
 
     assert (out.find(b"kernel_task") != -1) or (out.find(b"launchd") != -1)
@@ -392,7 +399,7 @@ def test_mac_pslist(image, volatility, python):
 
 
 def test_mac_check_syscall(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "mac.check_syscall.Check_syscall", image, volatility, python
     )
     out = out.lower()
@@ -405,7 +412,7 @@ def test_mac_check_syscall(image, volatility, python):
 
 
 def test_mac_check_sysctl(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "mac.check_sysctl.Check_sysctl", image, volatility, python
     )
     out = out.lower()
@@ -416,7 +423,7 @@ def test_mac_check_sysctl(image, volatility, python):
 
 
 def test_mac_check_trap_table(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "mac.check_trap_table.Check_trap_table", image, volatility, python
     )
     out = out.lower()
@@ -427,7 +434,7 @@ def test_mac_check_trap_table(image, volatility, python):
 
 
 def test_mac_ifconfig(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.ifconfig.Ifconfig", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.ifconfig.Ifconfig", image, volatility, python)
     out = out.lower()
 
     assert out.find(b"127.0.0.1") != -1
@@ -437,7 +444,7 @@ def test_mac_ifconfig(image, volatility, python):
 
 
 def test_mac_lsmod(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.lsmod.Lsmod", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.lsmod.Lsmod", image, volatility, python)
     out = out.lower()
 
     assert out.find(b"com.apple") != -1
@@ -446,7 +453,7 @@ def test_mac_lsmod(image, volatility, python):
 
 
 def test_mac_lsof(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.lsof.Lsof", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.lsof.Lsof", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"\n") > 50
@@ -454,7 +461,7 @@ def test_mac_lsof(image, volatility, python):
 
 
 def test_mac_malfind(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.malfind.Malfind", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.malfind.Malfind", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"\n") > 20
@@ -462,7 +469,7 @@ def test_mac_malfind(image, volatility, python):
 
 
 def test_mac_mount(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.mount.Mount", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.mount.Mount", image, volatility, python)
     out = out.lower()
 
     assert out.find(b"/dev") != -1
@@ -471,7 +478,7 @@ def test_mac_mount(image, volatility, python):
 
 
 def test_mac_netstat(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.netstat.Netstat", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.netstat.Netstat", image, volatility, python)
 
     assert out.find(b"TCP") != -1
     assert out.find(b"UDP") != -1
@@ -481,7 +488,7 @@ def test_mac_netstat(image, volatility, python):
 
 
 def test_mac_proc_maps(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.proc_maps.Maps", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.proc_maps.Maps", image, volatility, python)
     out = out.lower()
 
     assert out.find(b"[heap]") != -1
@@ -490,7 +497,7 @@ def test_mac_proc_maps(image, volatility, python):
 
 
 def test_mac_psaux(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.psaux.Psaux", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.psaux.Psaux", image, volatility, python)
     out = out.lower()
 
     assert out.find(b"executable_path") != -1
@@ -499,7 +506,7 @@ def test_mac_psaux(image, volatility, python):
 
 
 def test_mac_socket_filters(image, volatility, python):
-    rc, out, err = runvol_plugin(
+    rc, out, _err = runvol_plugin(
         "mac.socket_filters.Socket_filters", image, volatility, python
     )
     out = out.lower()
@@ -509,7 +516,7 @@ def test_mac_socket_filters(image, volatility, python):
 
 
 def test_mac_timers(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.timers.Timers", image, volatility, python)
+    rc, out, _err = runvol_plugin("mac.timers.Timers", image, volatility, python)
     out = out.lower()
 
     assert out.count(b"\n") > 6
@@ -517,7 +524,9 @@ def test_mac_timers(image, volatility, python):
 
 
 def test_mac_trustedbsd(image, volatility, python):
-    rc, out, err = runvol_plugin("mac.trustedbsd.Trustedbsd", image, volatility, python)
+    rc, out, _err = runvol_plugin(
+        "mac.trustedbsd.Trustedbsd", image, volatility, python
+    )
     out = out.lower()
 
     assert out.count(b"\n") > 10
