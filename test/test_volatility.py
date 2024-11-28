@@ -442,10 +442,9 @@ def test_linux_capabilities(image, volatility, python):
 
 
 def test_linux_check_creds(image, volatility, python):
-    rc, out, _err = runvol_plugin(
+    rc, _out, _err = runvol_plugin(
         "linux.check_creds.Check_creds", image, volatility, python
     )
-    out = out.lower()
 
     # linux-sample-1.bin has no processes sharing credentials.
     # This validates that plugin requirements are met and exceptions are not raised.
@@ -488,8 +487,7 @@ def test_linux_kthreads(image, volatility, python):
 
 
 def test_linux_malfind(image, volatility, python):
-    rc, out, _err = runvol_plugin("linux.malfind.Malfind", image, volatility, python)
-    out = out.lower()
+    rc, _out, _err = runvol_plugin("linux.malfind.Malfind", image, volatility, python)
 
     # linux-sample-1.bin has no process memory ranges with potential injected code.
     # This validates that plugin requirements are met and exceptions are not raised.
@@ -515,8 +513,7 @@ def test_linux_psaux(image, volatility, python):
 
 
 def test_linux_ptrace(image, volatility, python):
-    rc, out, _err = runvol_plugin("linux.ptrace.Ptrace", image, volatility, python)
-    out = out.lower()
+    rc, _out, _err = runvol_plugin("linux.ptrace.Ptrace", image, volatility, python)
 
     # linux-sample-1.bin has no processes being ptreaced.
     # This validates that plugin requirements are met and exceptions are not raised.
