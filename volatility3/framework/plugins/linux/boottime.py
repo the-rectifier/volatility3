@@ -15,7 +15,6 @@ class Boottime(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface)
     """Shows the time the system was started"""
 
     _required_framework_version = (2, 11, 0)
-
     _version = (1, 0, 1)
 
     @classmethod
