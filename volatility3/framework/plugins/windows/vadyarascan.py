@@ -32,6 +32,9 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
             requirements.PluginRequirement(
                 name="pslist", plugin=pslist.PsList, version=(2, 0, 0)
             ),
+            requirements.VersionRequirement(
+                name="yarascanner", component=yarascan.YaraScanner, version=(2, 0, 0)
+            ),
             requirements.PluginRequirement(
                 name="yarascan", plugin=yarascan.YaraScan, version=(2, 0, 0)
             ),
@@ -66,49 +69,33 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
         ):
             layer_name = task.add_process_layer()
             layer = self.context.layers[layer_name]
-            for start, size in self.get_vad_maps(task):
-                if size > sanity_check:
-                    vollog.debug(
-                        f"VAD at 0x{start:x} over sanity-check size, not scanning"
-                    )
-                    continue
 
-                data = layer.read(start, size, True)
-                if not yarascan.YaraScan._yara_x:
-                    for match in rules.match(data=data):
-                        if yarascan.YaraScan.yara_returns_instances():
-                            for match_string in match.strings:
-                                for instance in match_string.instances:
-                                    yield 0, (
-                                        format_hints.Hex(instance.offset + start),
-                                        task.UniqueProcessId,
-                                        match.rule,
-                                        match_string.identifier,
-                                        instance.matched_data,
-                                    )
-                        else:
-                            for offset, name, value in match.strings:
-                                yield 0, (
-                                    format_hints.Hex(offset + start),
-                                    task.UniqueProcessId,
-                                    match.rule,
-                                    name,
-                                    value,
-                                )
-                else:
-                    for match in rules.scan(data).matching_rules:
-                        for match_string in match.patterns:
-                            for instance in match_string.matches:
-                                yield 0, (
-                                    format_hints.Hex(instance.offset + start),
-                                    task.UniqueProcessId,
-                                    f"{match.namespace}.{match.identifier}",
-                                    match_string.identifier,
-                                    data[
-                                        instance.offset : instance.offset
-                                        + instance.length
-                                    ],
-                                )
+            vad_maps = list(self.get_vad_maps(task))
+            insane_vad_maps = [
+                start for (start, size) in vad_maps if size > sanity_check
+            ]
+            for start in insane_vad_maps:
+                vollog.debug(f"VAD at 0x{start:x} over sanity-check size, not scanning")
+
+            max_vad_size: int = max(
+                [size for (start, size) in vad_maps if size <= sanity_check]
+            )
+            scanner = yarascan.YaraScanner(rules=rules)
+            scanner.chunk_size = max_vad_size
+
+            # scan the process layer with the yarascanner
+            for offset, rule_name, name, value in layer.scan(
+                context=self.context,
+                scanner=scanner,
+                sections=vad_maps,
+            ):
+                yield 0, (
+                    format_hints.Hex(offset),
+                    task.UniqueProcessId,
+                    rule_name,
+                    name,
+                    value,
+                )
 
     @staticmethod
     def get_vad_maps(
