@@ -71,20 +71,21 @@ class VmaYaraScan(interfaces.plugins.PluginInterface):
             # get the proc_layer object from the context
             proc_layer = self.context.layers[proc_layer_name]
 
-            vma_maps = list(self.get_vma_maps(task))
-            insane_vma_maps = [
-                start for (start, size) in vma_maps if size > sanity_check
-            ]
-            for start in insane_vma_maps:
-                vollog.debug(f"VMA at 0x{start:x} over sanity-check size, not scanning")
+            max_vma_size = 0
+            vma_maps_to_scan = []
+            for start, size in self.get_vma_maps(task):
+                if size > sanity_check:
+                    vollog.debug(
+                        f"VMA at 0x{start:x} over sanity-check size, not scanning"
+                    )
+                    continue
+                max_vma_size = max(max_vma_size, size)
+                vma_maps_to_scan.append((start, size))
 
-            if not vma_maps:
-                vollog.warning(f"No VMAs were found for task {task.pid}, aborting")
+            if not vma_maps_to_scan:
+                vollog.warning(f"No VMAs were found for task {task.tgid}, not scanning")
                 continue
 
-            max_vma_size: int = max(
-                [size for (start, size) in vma_maps if size <= sanity_check]
-            )
             scanner = yarascan.YaraScanner(rules=rules)
             scanner.chunk_size = max_vma_size
 
@@ -92,7 +93,7 @@ class VmaYaraScan(interfaces.plugins.PluginInterface):
             for offset, rule_name, name, value in proc_layer.scan(
                 context=self.context,
                 scanner=scanner,
-                sections=vma_maps,
+                sections=vma_maps_to_scan,
             ):
                 yield 0, (
                     format_hints.Hex(offset),

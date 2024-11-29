@@ -70,16 +70,24 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
             layer_name = task.add_process_layer()
             layer = self.context.layers[layer_name]
 
-            vad_maps = list(self.get_vad_maps(task))
-            insane_vad_maps = [
-                start for (start, size) in vad_maps if size > sanity_check
-            ]
-            for start in insane_vad_maps:
-                vollog.debug(f"VAD at 0x{start:x} over sanity-check size, not scanning")
+            max_vad_size = 0
+            vad_maps_to_scan = []
 
-            max_vad_size: int = max(
-                [size for (start, size) in vad_maps if size <= sanity_check]
-            )
+            for start, size in self.get_vad_maps(task):
+                if size > sanity_check:
+                    vollog.debug(
+                        f"VAD at 0x{start:x} over sanity-check size, not scanning"
+                    )
+                    continue
+                max_vad_size = max(max_vad_size, size)
+                vad_maps_to_scan.append((start, size))
+
+            if not vad_maps_to_scan:
+                vollog.warning(
+                    f"No VADs were found for task {task.UniqueProcessID}, not scanning"
+                )
+                continue
+
             scanner = yarascan.YaraScanner(rules=rules)
             scanner.chunk_size = max_vad_size
 
@@ -87,7 +95,7 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
             for offset, rule_name, name, value in layer.scan(
                 context=self.context,
                 scanner=scanner,
-                sections=vad_maps,
+                sections=vad_maps_to_scan,
             ):
                 yield 0, (
                     format_hints.Hex(offset),
