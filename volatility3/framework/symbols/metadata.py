@@ -85,8 +85,8 @@ class WindowsMetadata(interfaces.symbols.MetadataInterface):
         return self._json_data.get("pdb", {}).get("age", None)
 
 
-class DwarfMetadata(interfaces.symbols.MetadataInterface):
-    """Base class to handle metadata of DWARF-based ISF sources"""
+class PosixMetadata(interfaces.symbols.MetadataInterface):
+    """Base class to handle metadata of Posix-based ISF sources"""
 
     def get_types_sources(self) -> List[Optional[Dict]]:
         """Returns the types sources metadata"""
@@ -97,9 +97,9 @@ class DwarfMetadata(interfaces.symbols.MetadataInterface):
         return self._json_data.get("symbols", [])
 
 
-class LinuxMetadata(DwarfMetadata):
+class LinuxMetadata(PosixMetadata):
     """Class to handle the metadata from a Linux symbol table."""
 
 
-class MacMetadata(DwarfMetadata):
+class MacMetadata(PosixMetadata):
     """Class to handle the metadata from a Mac symbol table."""
