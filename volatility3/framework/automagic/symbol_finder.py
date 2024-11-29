@@ -161,27 +161,29 @@ class SymbolFinder(interfaces.automagic.AutomagicInterface):
                 ] = layer.address_mask
 
                 # Keep track of the existing table names so we know which ones were added
-                old_table_names = set(context.symbol_space._dict)
+                old_table_names = set(context.symbol_space)
 
                 # Construct the appropriate symbol table
                 requirement.construct(context, config_path)
 
-                new_table_names = context.symbol_space._dict.keys() - old_table_names
+                new_table_names = set(context.symbol_space) - old_table_names
                 # It should add only one symbol table. Ignore the next steps if it doesn't
                 if len(new_table_names) == 1:
                     new_table_name = new_table_names.pop()
-                    symbol_table = context.symbol_space._dict[new_table_name]
-                    producer = symbol_table.producer
+                    symbol_table = context.symbol_space[new_table_name]
+                    producer_metadata = symbol_table.producer
                     vollog.debug(
-                        f"producer_name: {producer.name}, producer_version: {producer.version_string}"
+                        f"producer_name: {producer_metadata.name}, producer_version: {producer_metadata.version_string}"
                     )
-                    for category in symbol_table.metadata._json_data:
-                        vollog.debug(f"{category}:")
-                        for subkey in symbol_table.metadata._json_data[category]:
-                            subkey_item = ", ".join(
-                                f"{key}: '{value}'" for key, value in subkey.items()
-                            )
-                            vollog.debug(f"\t{subkey_item}")
+
+                    symbol_metadata = symbol_table.metadata
+                    vollog.debug("Types:")
+                    for types_source_dict in symbol_metadata.get_types_sources():
+                        vollog.debug(f"\t{types_source_dict}")
+
+                    vollog.debug("Symbols:")
+                    for symbol_source_dict in symbol_metadata.get_symbols_sources():
+                        vollog.debug(f"\t{symbol_source_dict}")
 
                 break
             else:

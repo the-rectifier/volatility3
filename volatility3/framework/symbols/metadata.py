@@ -4,8 +4,7 @@
 
 import datetime
 import logging
-from typing import Optional, Tuple, Union
-
+from typing import Optional, Tuple, Union, List, Dict
 from volatility3.framework import constants, interfaces
 
 vollog = logging.getLogger(__name__)
@@ -86,9 +85,21 @@ class WindowsMetadata(interfaces.symbols.MetadataInterface):
         return self._json_data.get("pdb", {}).get("age", None)
 
 
-class LinuxMetadata(interfaces.symbols.MetadataInterface):
+class DwarfMetadata(interfaces.symbols.MetadataInterface):
+    """Base class to handle metadata of DWARF-based ISF sources"""
+
+    def get_types_sources(self) -> List[Optional[Dict]]:
+        """Returns the types sources metadata"""
+        return self._json_data.get("types", [])
+
+    def get_symbols_sources(self) -> List[Optional[Dict]]:
+        """Returns the symbols sources metadata"""
+        return self._json_data.get("symbols", [])
+
+
+class LinuxMetadata(DwarfMetadata):
     """Class to handle the metadata from a Linux symbol table."""
 
 
-class MacMetadata(interfaces.symbols.MetadataInterface):
+class MacMetadata(DwarfMetadata):
     """Class to handle the metadata from a Mac symbol table."""
