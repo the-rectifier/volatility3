@@ -36,6 +36,9 @@ class VmaYaraScan(interfaces.plugins.PluginInterface):
             requirements.PluginRequirement(
                 name="yarascan", plugin=yarascan.YaraScan, version=(2, 0, 0)
             ),
+            requirements.VersionRequirement(
+                name="yarascanner", component=yarascan.YaraScanner, version=(2, 0, 0)
+            ),
             requirements.ModuleRequirement(
                 name="kernel",
                 description="Linux kernel",
@@ -89,19 +92,18 @@ class VmaYaraScan(interfaces.plugins.PluginInterface):
             scanner = yarascan.YaraScanner(rules=rules)
             scanner.chunk_size = max_vma_size
 
-            # scan the process layer with the yarascanner
-            for offset, rule_name, name, value in proc_layer.scan(
-                context=self.context,
-                scanner=scanner,
-                sections=vma_maps_to_scan,
-            ):
-                yield 0, (
-                    format_hints.Hex(offset),
-                    task.tgid,
-                    rule_name,
-                    name,
-                    value,
-                )
+            # scan the VMA data (in one contiguous block) with the yarascanner
+            for start, size in vma_maps_to_scan:
+                for offset, rule_name, name, value in scanner(
+                    proc_layer.read(start, size, pad=True), start
+                ):
+                    yield 0, (
+                        format_hints.Hex(offset),
+                        task.tgid,
+                        rule_name,
+                        name,
+                        value,
+                    )
 
     @staticmethod
     def get_vma_maps(

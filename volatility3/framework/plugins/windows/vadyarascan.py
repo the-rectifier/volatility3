@@ -91,19 +91,18 @@ class VadYaraScan(interfaces.plugins.PluginInterface):
             scanner = yarascan.YaraScanner(rules=rules)
             scanner.chunk_size = max_vad_size
 
-            # scan the process layer with the yarascanner
-            for offset, rule_name, name, value in layer.scan(
-                context=self.context,
-                scanner=scanner,
-                sections=vad_maps_to_scan,
-            ):
-                yield 0, (
-                    format_hints.Hex(offset),
-                    task.UniqueProcessId,
-                    rule_name,
-                    name,
-                    value,
-                )
+            # scan the VAD data (in one contiguous block) with the yarascanner
+            for start, size in vad_maps_to_scan:
+                for offset, rule_name, name, value in scanner(
+                    layer.read(start, size, pad=True), start
+                ):
+                    yield 0, (
+                        format_hints.Hex(offset),
+                        task.UniqueProcessId,
+                        rule_name,
+                        name,
+                        value,
+                    )
 
     @staticmethod
     def get_vad_maps(
