@@ -14,6 +14,7 @@ import tempfile
 import hashlib
 import ntpath
 import json
+import contextlib
 
 #
 # HELPER FUNCTIONS
@@ -272,6 +273,59 @@ def test_windows_devicetree(image, volatility, python):
     assert out.find(b"FILE_DEVICE_CONTROLLER") != -1
     assert out.find(b"FILE_DEVICE_DISK") != -1
     assert out.find(b"FILE_DEVICE_DISK_FILE_SYSTEM") != -1
+    assert rc == 0
+
+
+def test_windows_vadyarascan_yara_rule(image, volatility, python):
+    yara_rule_01 = r"""
+        rule fullvadyarascan
+        {
+            strings:
+                $s1 = "!This program cannot be run in DOS mode."
+                $s2 = "Qw))Pw"
+                $s3 = "W_wD)Pw"
+                $s4 = "1Xw+2Xw"
+                $s5 = "xd`wh``w"
+                $s6 = "0g`w0g`w8g`w8g`w@g`w@g`wHg`wHg`wPg`wPg`wXg`wXg`w`g`w`g`whg`whg`wpg`wpg`wxg`wxg`w"
+            condition:
+                all of them
+        }
+    """
+
+    # FIXME: When the minimum Python version includes 3.12, replace the following with:
+    # with tempfile.NamedTemporaryFile(delete_on_close=False) as fd: ...
+    fd, filename = tempfile.mkstemp(suffix=".yar")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(yara_rule_01)
+
+        rc, out, _err = runvol_plugin(
+            "windows.vadyarascan.VadYaraScan",
+            image,
+            volatility,
+            python,
+            pluginargs=["--pid", "4012", "--yara-file", filename],
+        )
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(filename)
+
+    out = out.lower()
+    assert out.count(b"\n") > 4
+    assert rc == 0
+
+
+def test_windows_vadyarascan(image, volatility, python):
+    rc, out, _err = runvol_plugin(
+        "windows.vadyarascan.VadYaraScan",
+        image,
+        volatility,
+        python,
+        pluginargs=["--pid", "4012", "--yara-string", "MZ"],
+    )
+    out = out.lower()
+
+    assert out.count(b"\n") > 10
     assert rc == 0
 
 
@@ -537,6 +591,42 @@ def test_linux_vmayarascan(image, volatility, python):
     out = out.lower()
 
     assert out.count(b"\n") > 10
+    assert rc == 0
+
+
+def test_linux_vmayarascan_yara_rule(image, volatility, python):
+    yara_rule_01 = r"""
+        rule fullvmayarascan
+        {
+            strings:
+                $s1 = "_nss_files_parse_grent"
+                $s2 = "/lib64/ld-linux-x86-64.so.2"
+                $s3 = "(bufferend - (char *) 0) % sizeof (char *) == 0"
+            condition:
+                all of them
+        }
+    """
+
+    # FIXME: When the minimum Python version includes 3.12, replace the following with:
+    # with tempfile.NamedTemporaryFile(delete_on_close=False) as fd: ...
+    fd, filename = tempfile.mkstemp(suffix=".yar")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(yara_rule_01)
+
+        rc, out, _err = runvol_plugin(
+            "linux.vmayarascan.VmaYaraScan",
+            image,
+            volatility,
+            python,
+            pluginargs=["--pid", "8600", "--yara-file", filename],
+        )
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(filename)
+
+    out = out.lower()
+    assert out.count(b"\n") > 4
     assert rc == 0
 
 
