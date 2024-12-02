@@ -2511,6 +2511,10 @@ class scatterlist(objects.StructType):
         Returns:
             An iterator of bytes
         """
-        physical_layer = self._context.layers["memory_layer"]
+        # Either "physical" is layer-1 because this is a module layer, either "physical" is the current layer
+        physical_layer_name = self._context.layers[self.vol.layer_name].config.get(
+            "memory_layer", self.vol.layer_name
+        )
+        physical_layer = self._context.layers[physical_layer_name]
         for sg in self.for_each_sg():
             yield from physical_layer.read(sg.dma_address, sg._sg_dma_len())
