@@ -182,7 +182,7 @@ class Intel(linear.LinearlyMappedLayer):
 
     def _pte_pfn(self, entry: int) -> int:
         """Extracts the page frame number (PFN) from the page table entry (PTE) entry"""
-        return entry >> self.page_shift
+        return self._mask(entry, self._maxphyaddr - 1, 0) >> self.page_shift
 
     def _translate_entry(self, offset: int) -> Tuple[int, int]:
         """Translates a specific offset based on paging tables.
