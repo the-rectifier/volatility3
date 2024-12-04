@@ -61,6 +61,13 @@ python environment, we can do the following:
     (layer_name) >>> proc
     <EPROCESS symbol_table_name1!_EPROCESS: layer_name @ 0xe08ff2459040 #1968>
 
+Alternatively, given a PID of a process we can grab and assign the data using the `gp()` (`get_process`) function as so:
+
+::
+    (layer_name) >>> proc = gp(736)
+    (layer_name) >>> proc
+    <EPROCESS symbol_table_name1!_EPROCESS: layer_name @ 0xb90b880bc080 #2624>
+
 When printing a volatility structure, various information is output, in this case the `type_name`, the `layer` and
 `offset` that it's been constructed on, and the size of the structure.
 

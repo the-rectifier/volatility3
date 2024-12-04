@@ -43,12 +43,22 @@ class Volshell(generic.Volshell):
                 self.context, self.current_layer, self.current_symbol_table
             )
         )
+        
+    def get_process(self, pid):
+        """Returns the EPROCESS object that matches the pid"""
+        processes = self.list_processes()
+        for process in processes:
+            if process.UniqueProcessId == pid:
+                return process
+        print(f"No process with process ID {pid} found")
+        return None
 
     def construct_locals(self) -> List[Tuple[List[str], Any]]:
         result = super().construct_locals()
         result += [
             (["cp", "change_process"], self.change_process),
             (["lp", "list_processes", "ps"], self.list_processes),
+            (["gp", "get_process"], self.get_process),
             (["symbols"], self.context.symbol_space[self.current_symbol_table]),
         ]
         if self.config.get("pid", None) is not None:
