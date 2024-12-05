@@ -164,7 +164,6 @@ def _filter_files(filename: str):
     return (
         filename.endswith(".py")
         or filename.endswith(".pyc")
-        or filename.endswith(".pyo")
     ) and not filename.startswith("__")
 
 
