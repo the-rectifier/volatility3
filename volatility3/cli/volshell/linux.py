@@ -40,6 +40,14 @@ class Volshell(generic.Volshell):
                 return None
         print(f"No task with task ID {pid} found")
 
+    def get_task(self, pid):
+        """Get Task based on a process ID. Does not retrieve the layer, to change layer use the .pid attribute"""
+        tasks = self.list_tasks()
+        for task in tasks:
+            if task.pid == pid:
+                return task
+        print(f"No task with task ID {pid} found")
+    
     def list_tasks(self):
         """Returns a list of task objects from the primary layer"""
         # We always use the main kernel memory and associated symbols
@@ -50,6 +58,7 @@ class Volshell(generic.Volshell):
         result += [
             (["ct", "change_task", "cp"], self.change_task),
             (["lt", "list_tasks", "ps"], self.list_tasks),
+            (["gp", "get_task"], self.get_task),
             (["symbols"], self.context.symbol_space[self.current_symbol_table]),
         ]
         if self.config.get("pid", None) is not None:
