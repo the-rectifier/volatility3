@@ -167,8 +167,7 @@ There are certain setup tasks that establish the context in a way favorable to a
 several tasks that are repetitive and also easy to get wrong.  These are called
 :py:class:`Automagic <volatility3.framework.interfaces.automagic.AutomagicInterface>`, since they do things like magically
 taking a raw memory image and automatically providing the plugin with an appropriate Intel translation layer and an
-accurate symbol table without either the plugin or the calling program having to specify all the necessary details.
+accurate symbol table without either the plugin or the calling program having to specify all the necessary details.  Automagics are a core component which consumers of the library can call or not at their discretion.
 
 .. note:: Volatility 2 used to do this as well, but it wasn't a particularly modular mechanism, and was used only for
     stacking address spaces (rather than identifying profiles), and it couldn't really be disabled/configured easily.
-    Automagics in Volatility 3 are a core component which consumers of the library can call or not at their discretion.
