@@ -825,6 +825,11 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
                 constants.LOGLEVEL_VVV,
                 f"Cannot access _EPROCESS.Session.SessionId at {self.vol.offset:#x}",
             )
+        except exceptions.SymbolError:
+            vollog.log(
+                constants.LOGLEVEL_VVV,
+                "Could not lookup _MM_SESSION_SPACE in symbol table",
+            )
 
         return renderers.UnreadableValue()
 
