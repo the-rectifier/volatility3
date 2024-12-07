@@ -36,11 +36,11 @@ This was because live memory analysis was barely ever used, and this feature cou
 re-read many times over for no benefit (particularly since each re-read could result in many additional image reads
 from following page table translations).
 
-Finally, in order to provide Volatility specific information without impact on the ability for structures to have members
+Further, in order to provide Volatility specific information without impact on the ability for structures to have members
 with arbitrary names, all the metadata about the object (such as its layer or offset) have been moved to a read-only :py:meth:`~volatility3.framework.interfaces.objects.ObjectInterface.vol`
 dictionary.
 
-Further the distinction between a :py:class:`~volatility3.framework.interfaces.objects.Template` (the thing that
+Finally, the distinction between a :py:class:`~volatility3.framework.interfaces.objects.Template` (the thing that
 constructs an object) and the :py:class:`Object <volatility3.framework.interfaces.objects.ObjectInterface>` itself has
 been made more explicit.  In Volatility 2, some information (such as size) could only be determined from a constructed object,
 leading to instantiating a template on an empty buffer, just to determine the size.  In Volatility 3, templates contain
