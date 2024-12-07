@@ -35,7 +35,7 @@ Windows symbol tables can be manually constructed from an appropriate PDB file. 
 is built into Volatility 3, called :file:`pdbconv.py`.  It can be run from the top-level Volatility path, using the
 following command:
 
-:command:`PYTHONPATH="."; python volatility3/framework/symbols/windows/pdbconv.py`
+:command:`PYTHONPATH="." python volatility3/framework/symbols/windows/pdbconv.py`
 
 The :envvar:`PYTHONPATH` environment variable is not required if the Volatility library is installed in the system's library path
 or a virtual environment.
