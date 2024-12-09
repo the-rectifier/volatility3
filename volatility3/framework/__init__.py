@@ -143,9 +143,7 @@ def import_files(base_module, ignore_errors: bool = False) -> List[str]:
 
 def _filter_files(filename: str):
     """Ensures that a filename traversed is an importable python file"""
-    return (filename.endswith((".py", ".pyc"))) and not filename.startswith(
-        "__"
-    )
+    return (filename.endswith((".py", ".pyc"))) and not filename.startswith("__")
 
 
 def import_file(module: str, path: str, ignore_errors: bool = False) -> List[str]:
