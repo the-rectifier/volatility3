@@ -112,7 +112,7 @@ class DirectSystemCalls(interfaces.plugins.PluginInterface):
         syscall_finder: syscall_finder_type,
         data: bytes,
         address: int,
-    ) -> Optional[Tuple[str, capstone._cs_insn]]:
+    ) -> Optional[Tuple[str, "capstone._cs_insn"]]:
         """
         Determines if the bytes starting at `data` represent a valid syscall instrunction invocation block
 

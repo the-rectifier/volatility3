@@ -37,6 +37,7 @@ dev = [
 test = [
     "volatility3[dev]",
     "pytest>=8.3.3,<9",
+    "capstone>=5.0.3,<6",
     "yara-x>=0.10.0,<1",
 ]
 
