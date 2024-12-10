@@ -36,7 +36,7 @@ operating system mode for volshell, and the current layer available for use.
 
     (primary) >>>
 
-Volshell itself in essentially a plugin, but an interactive one.  As such, most values are accessed through `self`
+Volshell itself is essentially a plugin, but an interactive one.  As such, most values are accessed through `self`
 although there is also a `context` object whenever a context must be provided.
 
 The prompt for the tool will indicate the name of the current layer (which can be accessed as `self.current_layer`
@@ -92,7 +92,7 @@ It can also be provided with an object and will interpret the data for each in t
      0x2e8 :   UniqueProcessId                             symbol_table_name1!pointer                             4
     ...
 
-These values can be accessed directory as attributes
+These values can be accessed directly as attributes
 
 ::
 
@@ -180,7 +180,7 @@ used:
 
     layer = cc(mynewlayer.MyNewLayer, on_top_of = 'primary', other_parameter = 'important')
     with open('output.dmp', 'wb') as fp:
-        for i in range(0, 1073741824, 0x1000):
+        for i in range(0, 0x4000000, 0x1000):
             data = layer.read(i, 0x1000, pad = True)
             fp.write(data)
 
