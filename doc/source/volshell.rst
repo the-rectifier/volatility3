@@ -190,7 +190,7 @@ creates a constructable, like a layer or a symbol table).
 User Convenience
 ----------------
 
-There are functions available that make often-done tasks easiers, and generally provide a shell-like experience.  These can be listed using `help()` which, as already mentioned, is mentioned when volshell starts.
+There are functions available that make often-done tasks easier, and generally provide a shell-like experience.  These can be listed using `help()` which, as already mentioned, is advertised when volshell starts.
 
 Loading files
 ^^^^^^^^^^^^^
