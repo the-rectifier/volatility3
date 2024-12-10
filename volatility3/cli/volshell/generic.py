@@ -555,8 +555,8 @@ class Volshell(interfaces.plugins.PluginInterface):
 
         for keyword, val in kwargs.items():
             if not isinstance(
-                val, interfaces.configuration.BasicTypes
-            ) and not isinstance(val, list):
+                val, (interfaces.configuration.BasicTypes, list)
+            ):
                 if all(
                     isinstance(x, interfaces.configuration.BasicTypes) for x in val
                 ):
