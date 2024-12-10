@@ -554,12 +554,8 @@ class Volshell(interfaces.plugins.PluginInterface):
                 del kwargs[argname]
 
         for keyword, val in kwargs.items():
-            if not isinstance(
-                val, (interfaces.configuration.BasicTypes, list)
-            ):
-                if all(
-                    isinstance(x, interfaces.configuration.BasicTypes) for x in val
-                ):
+            if not isinstance(val, (interfaces.configuration.BasicTypes, list)):
+                if all(isinstance(x, interfaces.configuration.BasicTypes) for x in val):
                     raise TypeError(
                         "Configurable values must be simple types (int, bool, str, bytes)"
                     )
