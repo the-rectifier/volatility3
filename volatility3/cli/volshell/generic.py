@@ -11,17 +11,17 @@ import sys
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 from urllib import parse, request
 
-from volatility3.cli import text_renderer, volshell
-from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
-from volatility3.framework.configuration import requirements
-from volatility3.framework.layers import intel, physical, resources, scanners
-
 try:
     import capstone
 
     has_capstone = True
 except ImportError:
     has_capstone = False
+
+from volatility3.cli import text_renderer, volshell
+from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
+from volatility3.framework.configuration import requirements
+from volatility3.framework.layers import intel, physical, resources, scanners
 
 
 class Volshell(interfaces.plugins.PluginInterface):
@@ -553,12 +553,11 @@ class Volshell(interfaces.plugins.PluginInterface):
             if argname in kwargs:
                 del kwargs[argname]
 
-        for keyword in kwargs:
-            val = kwargs[keyword]
+        for keyword, val in kwargs.items():
             if not isinstance(
                 val, interfaces.configuration.BasicTypes
             ) and not isinstance(val, list):
-                if not isinstance(val, list) or all(
+                if all(
                     isinstance(x, interfaces.configuration.BasicTypes) for x in val
                 ):
                     raise TypeError(
