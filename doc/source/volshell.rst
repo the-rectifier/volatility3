@@ -187,8 +187,22 @@ used:
 As this demonstrates, all of the python is accessible, as are the volshell built in functions (such as `cc` which
 creates a constructable, like a layer or a symbol table).
 
+User Convenience
+----------------
+
+There are functions available that make often-done tasks easiers, and generally provide a shell-like experience.  These can be listed using `help()` which, as already mentioned, is mentioned when volshell starts.
+
 Loading files
--------------
+^^^^^^^^^^^^^
 
 Files can be loaded as physical layers using the `load_file` or `lf` command, which takes a filename or a URI.  This will be added
 to `context.layers` and can be accessed by the name returned by `lf`.
+
+Regex
+^^^^^
+
+It is easy to scan for some bytes or a pattern using `regex_scan` or `rx`.
+
+An optional size can be given for the displayed results as with the other fuctions (db, dw, dd, dq, etc).
+
+You can of course specify a different layer name as well.
