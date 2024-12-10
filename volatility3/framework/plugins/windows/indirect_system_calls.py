@@ -13,10 +13,10 @@ from volatility3.plugins.windows import pslist, direct_system_calls
 
 vollog = logging.getLogger(__name__)
 
-# The generator of DirectSystemCalls will bail with a warning if capstone is not installed
 try:
     import capstone
 except ImportError:
+    # The generator of DirectSystemCalls will bail with a warning if capstone is not installed
     pass
 
 

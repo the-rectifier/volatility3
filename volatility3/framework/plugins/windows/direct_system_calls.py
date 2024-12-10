@@ -39,7 +39,7 @@ syscall_finder_type = namedtuple(
 )
 
 syscall_finder_type.__doc__ = """
-This type to used to specify how malicious system call invocations should be found.
+This type is used to specify how malicious system call invocations should be found.
 
 `get_syscall_target_address` is optionally used to extract the address containing the malicious 'syscall' instruction
 `wants_syscall_inst` whether or not this method expects the 'syscall' instrunction directly within the malicious code block
