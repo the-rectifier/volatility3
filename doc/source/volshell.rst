@@ -203,6 +203,45 @@ Regex
 
 It is easy to scan for some bytes or a pattern using `regex_scan` or `rx`.
 
+::
+
+    (layer_name) >>> rx(rb"(Linux version|Darwin Kernel Version) [0-9]+\.[0-9]+\.[0-9]+")
+    0x880001400070    4c 69 6e 75 78 20 76 65 72 73 69 6f 6e 20 33 2e    Linux.version.3.
+    0x880001400080    32 2e 30 2d 34 2d 61 6d 64 36 34 20 28 64 65 62    2.0-4-amd64.(deb
+    0x880001400090    69 61 6e 2d 6b 65 72 6e 65 6c 40 6c 69 73 74 73    ian-kernel@lists
+    0x8800014000a0    2e 64 65 62 69 61 6e 2e 6f 72 67 29 20 28 67 63    .debian.org).(gc
+    0x8800014000b0    63 20 76 65 72 73 69 6f 6e 20 34 2e 36 2e 33 20    c.version.4.6.3.
+    0x8800014000c0    28 44 65 62 69 61 6e 20 34 2e 36 2e 33 2d 31 34    (Debian.4.6.3-14
+    0x8800014000d0    29 20 29 20 23 31 20 53 4d 50 20 44 65 62 69 61    ).).#1.SMP.Debia
+    0x8800014000e0    6e 20 33 2e 32 2e 35 37 2d 33 2b 64 65 62 37 75    n.3.2.57-3+deb7u
+
+    0x880001769027    4c 69 6e 75 78 20 76 65 72 73 69 6f 6e 20 33 2e    Linux.version.3.
+    0x880001769037    32 2e 30 2d 34 2d 61 6d 64 36 34 20 28 64 65 62    2.0-4-amd64.(deb
+    0x880001769047    69 61 6e 2d 6b 65 72 6e 65 6c 40 6c 69 73 74 73    ian-kernel@lists
+    0x880001769057    2e 64 65 62 69 61 6e 2e 6f 72 67 29 20 28 67 63    .debian.org).(gc
+    0x880001769067    63 20 76 65 72 73 69 6f 6e 20 34 2e 36 2e 33 20    c.version.4.6.3.
+    0x880001769077    28 44 65 62 69 61 6e 20 34 2e 36 2e 33 2d 31 34    (Debian.4.6.3-14
+    0x880001769087    29 20 29 20 23 31 20 53 4d 50 20 44 65 62 69 61    ).).#1.SMP.Debia
+    0x880001769097    6e 20 33 2e 32 2e 35 37 2d 33 2b 64 65 62 37 75    n.3.2.57-3+deb7u
+
+    0xffff81400070    4c 69 6e 75 78 20 76 65 72 73 69 6f 6e 20 33 2e    Linux.version.3.
+    0xffff81400080    32 2e 30 2d 34 2d 61 6d 64 36 34 20 28 64 65 62    2.0-4-amd64.(deb
+    0xffff81400090    69 61 6e 2d 6b 65 72 6e 65 6c 40 6c 69 73 74 73    ian-kernel@lists
+    0xffff814000a0    2e 64 65 62 69 61 6e 2e 6f 72 67 29 20 28 67 63    .debian.org).(gc
+    0xffff814000b0    63 20 76 65 72 73 69 6f 6e 20 34 2e 36 2e 33 20    c.version.4.6.3.
+    0xffff814000c0    28 44 65 62 69 61 6e 20 34 2e 36 2e 33 2d 31 34    (Debian.4.6.3-14
+    0xffff814000d0    29 20 29 20 23 31 20 53 4d 50 20 44 65 62 69 61    ).).#1.SMP.Debia
+    0xffff814000e0    6e 20 33 2e 32 2e 35 37 2d 33 2b 64 65 62 37 75    n.3.2.57-3+deb7u
+
+    0xffff81769027    4c 69 6e 75 78 20 76 65 72 73 69 6f 6e 20 33 2e    Linux.version.3.
+    0xffff81769037    32 2e 30 2d 34 2d 61 6d 64 36 34 20 28 64 65 62    2.0-4-amd64.(deb
+    0xffff81769047    69 61 6e 2d 6b 65 72 6e 65 6c 40 6c 69 73 74 73    ian-kernel@lists
+    0xffff81769057    2e 64 65 62 69 61 6e 2e 6f 72 67 29 20 28 67 63    .debian.org).(gc
+    0xffff81769067    63 20 76 65 72 73 69 6f 6e 20 34 2e 36 2e 33 20    c.version.4.6.3.
+    0xffff81769077    28 44 65 62 69 61 6e 20 34 2e 36 2e 33 2d 31 34    (Debian.4.6.3-14
+    0xffff81769087    29 20 29 20 23 31 20 53 4d 50 20 44 65 62 69 61    ).).#1.SMP.Debia
+    0xffff81769097    6e 20 33 2e 32 2e 35 37 2d 33 2b 64 65 62 37 75    n.3.2.57-3+deb7u
+
 An optional size can be given for the displayed results as with the other fuctions (db, dw, dd, dq, etc).
 
-You can of course specify a different layer name as well.
+You can, of course, specify a different layer name as well.
