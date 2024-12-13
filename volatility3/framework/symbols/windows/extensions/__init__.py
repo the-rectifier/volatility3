@@ -813,22 +813,35 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
                     offset=kvo,
                     native_layer_name=self.vol.native_layer_name,
                 )
-                session = ntkrnlmp.object(
-                    object_type="_MM_SESSION_SPACE", offset=self.Session, absolute=True
-                )
-
-                if session.has_member("SessionId"):
-                    return session.SessionId
+                try:
+                    session = ntkrnlmp.object(
+                        object_type="_MM_SESSION_SPACE",
+                        offset=self.Session,
+                        absolute=True,
+                    )
+                    if session.has_member("SessionId"):
+                        return session.SessionId
+                except exceptions.SymbolError:
+                    # In Windows 11 24H2, the _MM_SESSION_SPACE type was
+                    # replaced with _PSP_SESSION_SPACE, and the kernel PDB
+                    # doesn't contain information about its members (otherwise,
+                    # we would just fall back to the new type). However, it
+                    # appears to be, for our purposes, functionally identical
+                    # to the _MM_SESSION_SPACE. Because _MM_SESSION_SPACE
+                    # stores its session ID at offset 8 as an unsigned long, we
+                    # create an unsigned long at that offset and use that
+                    # instead.
+                    session_id = ntkrnlmp.object(
+                        object_type="unsigned long",
+                        offset=self.Session + 8,
+                        absolute=True,
+                    )
+                    return int(session_id)
 
         except exceptions.InvalidAddressException:
             vollog.log(
                 constants.LOGLEVEL_VVV,
                 f"Cannot access _EPROCESS.Session.SessionId at {self.vol.offset:#x}",
-            )
-        except exceptions.SymbolError:
-            vollog.log(
-                constants.LOGLEVEL_VVV,
-                "Could not lookup _MM_SESSION_SPACE in symbol table",
             )
 
         return renderers.UnreadableValue()
