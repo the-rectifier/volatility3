@@ -72,7 +72,7 @@ Options
     the operating system to which they apply.
 
 -v, --verbose
-    A flag which can be used multiple times (up to four), each time increasing the level of
+    A flag which can be used multiple times (up to six, -vvvvvv), each time increasing the level of
     detail in the logs produced.
 
 -l LOG, --log LOG
