@@ -529,6 +529,8 @@ class VersionRequirement(interfaces.configuration.RequirementInterface):
         component: Type[interfaces.configuration.VersionableInterface] = None,
         version: Optional[Tuple[int, ...]] = None,
     ) -> None:
+        if version is None:
+            raise TypeError("Version cannot be None")
         if description is None:
             description = f"Version {'.'.join([str(x) for x in version])} dependency on {component.__module__}.{component.__name__} unmet"
         super().__init__(
@@ -537,8 +539,6 @@ class VersionRequirement(interfaces.configuration.RequirementInterface):
         if component is None:
             raise TypeError("Component cannot be None")
         self._component: Type[interfaces.configuration.VersionableInterface] = component
-        if version is None:
-            raise TypeError("Version cannot be None")
         self._version = version
 
     def unsatisfied(
