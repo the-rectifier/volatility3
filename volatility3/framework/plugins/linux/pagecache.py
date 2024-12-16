@@ -520,7 +520,6 @@ class InodePages(plugins.PluginInterface):
             yield 0, fields
 
         if self.config["dump"]:
-            filename = self.config["dump"]
             open_method = self.open
             inode_address = inode.vol.offset
             filename = open_method.sanitize_filename(f"inode_0x{inode_address:x}.dmp")
