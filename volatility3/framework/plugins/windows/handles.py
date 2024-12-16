@@ -18,7 +18,7 @@ class Handles(interfaces.plugins.PluginInterface):
     """Lists process open handles."""
 
     _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 3)
+    _version = (2, 0, 0)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
