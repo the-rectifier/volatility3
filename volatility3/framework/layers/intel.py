@@ -73,9 +73,7 @@ class Intel(linear.LinearlyMappedLayer):
         )
 
         # These can vary depending on the type of space
-        self._index_shift = int(
-            math.ceil(math.log2(struct.calcsize(self._entry_format)))
-        )
+        self._index_shift = math.ceil(math.log2(struct.calcsize(self._entry_format)))
 
     @classproperty
     @functools.lru_cache()
@@ -125,7 +123,6 @@ class Intel(linear.LinearlyMappedLayer):
         high_mask = (1 << (high_bit + 1)) - 1
         low_mask = (1 << low_bit) - 1
         mask = high_mask ^ low_mask
-        # print(high_bit, low_bit, bin(mask), bin(value))
         return value & mask
 
     @staticmethod
@@ -147,7 +144,7 @@ class Intel(linear.LinearlyMappedLayer):
         return self._mask(addr, self._maxvirtaddr, 0) + self._canonical_prefix
 
     def decanonicalize(self, addr: int) -> int:
-        """Removes canonicalization to ensure an adress fits within the correct range if it has been canonicalized
+        """Removes canonicalization to ensure an address fits within the correct range if it has been canonicalized
 
         This will produce an address outside the range if the canonicalization is incorrect
         """
