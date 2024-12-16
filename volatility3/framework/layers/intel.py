@@ -73,9 +73,7 @@ class Intel(linear.LinearlyMappedLayer):
         )
 
         # These can vary depending on the type of space
-        self._index_shift = math.ceil(
-            math.log2(struct.calcsize(self._entry_format))
-        )
+        self._index_shift = math.ceil(math.log2(struct.calcsize(self._entry_format)))
 
     @classproperty
     @functools.lru_cache()
