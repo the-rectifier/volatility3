@@ -224,11 +224,11 @@ class PEDump(interfaces.plugins.PluginInterface):
         )
 
         if self.config["kernel_module"] and self.config["pid"]:
-            vollog.error("Only --kernel_module or --pid should be set. Not both")
+            vollog.error("Only 'kernel-module' or 'pid' should be set, not both")
             return
 
         if not self.config["kernel_module"] and not self.config["pid"]:
-            vollog.error("--kernel_module or --pid must be set")
+            vollog.error("Either 'kernel-module' or 'pid' argument must be set")
             return
 
         if self.config["kernel_module"]:
