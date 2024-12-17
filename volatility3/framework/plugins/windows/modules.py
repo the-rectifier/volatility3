@@ -104,11 +104,10 @@ class Modules(interfaces.plugins.PluginInterface):
 
             try:
                 BaseDllName = mod.BaseDllName.get_string()
+                if self.config["name"] and self.config["name"] not in BaseDllName:
+                    continue
             except exceptions.InvalidAddressException:
                 BaseDllName = interfaces.renderers.BaseAbsentValue()
-
-            if self.config["name"] and self.config["name"] not in BaseDllName:
-                continue
 
             try:
                 FullDllName = mod.FullDllName.get_string()
@@ -177,9 +176,7 @@ class Modules(interfaces.plugins.PluginInterface):
             except exceptions.InvalidAddressException:
                 vollog.log(
                     constants.LOGLEVEL_VVV,
-                    "Process {} does not have a valid Session or a layer could not be constructed for it".format(
-                        proc_id
-                    ),
+                    f"Process {proc_id} does not have a valid Session or a layer could not be constructed for it",
                 )
                 continue
 
@@ -250,8 +247,7 @@ class Modules(interfaces.plugins.PluginInterface):
             object_type=type_name, offset=list_entry.vol.offset - reloff, absolute=True
         )
 
-        for mod in module.InLoadOrderLinks:
-            yield mod
+        yield from module.InLoadOrderLinks
 
     def run(self):
         return renderers.TreeGrid(

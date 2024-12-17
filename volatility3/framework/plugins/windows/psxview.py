@@ -14,7 +14,6 @@ from volatility3.plugins.windows import (
     info,
     pslist,
     psscan,
-    sessions,
     thrdscan,
 )
 
@@ -219,7 +218,7 @@ class PsXView(plugins.PluginInterface):
             name = self._proc_name_to_string(proc)
 
             exit_time = proc.get_exit_time()
-            if type(exit_time) != datetime.datetime:
+            if type(exit_time) is not datetime.datetime:
                 exit_time = ""
             else:
                 exit_time = str(exit_time)

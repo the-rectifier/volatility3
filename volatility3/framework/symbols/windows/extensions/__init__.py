@@ -749,11 +749,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InLoadOrderModuleList.to_list(
+            yield from peb.Ldr.InLoadOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InLoadOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 
@@ -762,11 +761,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InInitializationOrderModuleList.to_list(
+            yield from peb.Ldr.InInitializationOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InInitializationOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 
@@ -775,11 +773,10 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         try:
             peb = self.get_peb()
-            for entry in peb.Ldr.InMemoryOrderModuleList.to_list(
+            yield from peb.Ldr.InMemoryOrderModuleList.to_list(
                 f"{self.get_symbol_table_name()}{constants.BANG}_LDR_DATA_TABLE_ENTRY",
                 "InMemoryOrderLinks",
-            ):
-                yield entry
+            )
         except exceptions.InvalidAddressException:
             return None
 
@@ -1081,7 +1078,7 @@ class KTIMER(objects.StructType):
         return self.Header.Type in self.VALID_TYPES
 
     def get_due_time(self):
-        return "{0:#010x}:{1:#010x}".format(self.DueTime.HighPart, self.DueTime.LowPart)
+        return f"{self.DueTime.HighPart:#010x}:{self.DueTime.LowPart:#010x}"
 
     def get_dpc(self):
         """Return Dpc, and if Windows 7 or later, decode it"""
@@ -1388,7 +1385,7 @@ class SHARED_CACHE_MAP(objects.StructType):
         )
 
         # Iterate through the entries
-        for counter in range(0, self.VACB_ARRAY):
+        for counter in range(self.VACB_ARRAY):
             # Check if the VACB entry is in use
             if not vacb_array[counter]:
                 continue
@@ -1472,7 +1469,7 @@ class SHARED_CACHE_MAP(objects.StructType):
 
         if not section_size > self.VACB_SIZE_OF_FIRST_LEVEL:
             array_head = vacb_obj
-            for counter in range(0, full_blocks):
+            for counter in range(full_blocks):
                 vacb_entry = self._context.object(
                     symbol_table_name + constants.BANG + "pointer",
                     layer_name=self.vol.layer_name,
@@ -1531,7 +1528,7 @@ class SHARED_CACHE_MAP(objects.StructType):
 
             # Walk the array and if any entry points to the shared cache map object then we extract it.
             # Otherwise, if it is non-zero, then traverse to the next level.
-            for counter in range(0, self.VACB_ARRAY):
+            for counter in range(self.VACB_ARRAY):
                 if not vacb_array[counter]:
                     continue
 

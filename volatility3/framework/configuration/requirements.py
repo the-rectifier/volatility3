@@ -664,9 +664,7 @@ class ModuleRequirement(
         if value is not None:
             vollog.log(
                 constants.LOGLEVEL_V,
-                "TypeError - Module Requirement only accepts string labels: {}".format(
-                    repr(value)
-                ),
+                f"TypeError - Module Requirement only accepts string labels: {repr(value)}",
             )
             return {config_path: self}
 
