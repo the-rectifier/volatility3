@@ -49,8 +49,8 @@ class CapabilitiesData:
 class Capabilities(plugins.PluginInterface):
     """Lists process capabilities"""
 
-    _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 1)
+    _required_framework_version = (2, 13, 0)
+    _version = (1, 1, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -136,7 +136,7 @@ class Capabilities(plugins.PluginInterface):
             comm=utility.array_to_string(task.comm),
             pid=int(task.pid),
             tgid=int(task.tgid),
-            ppid=int(task.parent.pid),
+            ppid=int(task.get_parent_pid()),
             euid=int(task.cred.euid),
         )
 

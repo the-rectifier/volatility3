@@ -633,6 +633,20 @@ class task_struct(generic.GenericIntelProcess):
         # root time namespace, not within the task's own time namespace
         return boottime + task_start_time_timedelta
 
+    def get_parent_pid(self) -> int:
+        """Returns the parent process ID (PPID)
+
+        This method replicates the Linux kernel's `getppid` syscall behavior.
+        Avoid using `task.parent`; instead, use this function for accurate results.
+        """
+
+        if self.real_parent and self.real_parent.is_readable():
+            ppid = self.real_parent.pid
+        else:
+            ppid = 0
+
+        return ppid
+
 
 class fs_struct(objects.StructType):
     def get_root_dentry(self):
