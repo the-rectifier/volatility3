@@ -483,6 +483,9 @@ class InodePages(plugins.PluginInterface):
                 if inode_in.path == self.config["find"]:
                     inode = inode_in.inode
                     break  # Only the first match
+            else:
+                vollog.error("Unable to find inode with path %s", self.config["find"])
+                return None
 
         elif self.config["inode"]:
             inode = vmlinux.object("inode", self.config["inode"], absolute=True)
