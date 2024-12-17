@@ -21,7 +21,7 @@ Creating a context
 First we make sure the volatility framework works the way we expect it (and is the version we expect).  The
 versioning used is semantic versioning, meaning any version with the same major number and a higher or equal
 minor number will satisfy the requirement.  An example is below since the CLI doesn't need any of the features
-from version 1.1:
+from version 1.1 or later:
 
 ::
 
@@ -139,7 +139,7 @@ A suitable list of automagics for a particular plugin (based on operating system
 
 This will take the plugin module, extract the operating system (first level of the hierarchy) and then return just
 the automagics which apply to the operating system.  Each automagic can exclude itself from being used for specific
-operating systems, so that for example an automagic designed for linux is not used for windows or mac plugins.
+operating systems, such that an automagic designed for linux is not used for windows or mac plugins.
 
 These automagics can then be run by providing the list, the context, the plugin to be run, the hierarchy name that
 the plugin will be constructed on ('plugins' by default) and a progress_callback.  This is a callable which takes
@@ -166,7 +166,7 @@ to `plugins` and then the name of the class itself):
     unsatisfied = plugin.unsatisfied(context, plugin_config_path)
 
 If unsatisfied is an empty list, then the plugin has been given everything it requires.  If not, it will be a
-dictionary of the hierarchy paths and their associated requirements that weren't satisfied.
+dict of the hierarchy paths and their associated requirements that weren't satisfied.
 
 The plugin can then be instantiated with the context (containing the plugin's configuration) and the path that the
 plugin can find its configuration at.  This configuration path only needs to be a unique value to identify where the
