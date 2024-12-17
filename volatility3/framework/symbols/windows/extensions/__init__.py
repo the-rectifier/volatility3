@@ -797,7 +797,7 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         return renderers.UnreadableValue()
 
-    def get_session_id(self):
+    def get_session_id(self) -> Union[int, interfaces.renderers.BaseAbsentValue]:
         try:
             if self.has_member("Session"):
                 if self.Session == 0:
@@ -836,7 +836,7 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
                         offset=self.Session + 8,
                         absolute=True,
                     )
-                    return int(session_id)
+                    return session_id
 
         except exceptions.InvalidAddressException:
             vollog.log(
