@@ -532,7 +532,7 @@ class VersionRequirement(interfaces.configuration.RequirementInterface):
         if version is None:
             raise TypeError("Version cannot be None")
         if description is None:
-            description = f"Version {'.'.join([str(x) for x in version])} dependency on {component.__module__}.{component.__name__} unmet"
+            description = f"Version {'.'.join(str(x) for x in version)} dependency on {component.__module__}.{component.__name__} unmet"
         super().__init__(
             name=name, description=description, default=default, optional=optional
         )
