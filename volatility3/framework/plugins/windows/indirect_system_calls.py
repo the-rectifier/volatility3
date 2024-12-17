@@ -73,7 +73,7 @@ class IndirectSystemCalls(direct_system_calls.DirectSystemCalls):
 
     @staticmethod
     def _indirect_syscall_block_target(
-        proc_layer: interfaces.layers.DataLayerInterface, inst: capstone._cs_insn
+        proc_layer: interfaces.layers.DataLayerInterface, inst
     ) -> Optional[int]:
         """
         This function determines the address of a jmp in the following form:

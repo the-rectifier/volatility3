@@ -69,7 +69,7 @@ class DumpFiles(interfaces.plugins.PluginInterface):
                 name="pslist", component=pslist.PsList, version=(2, 0, 0)
             ),
             requirements.VersionRequirement(
-                name="handles", component=handles.Handles, version=(1, 0, 0)
+                name="handles", component=handles.Handles, version=(2, 0, 0)
             ),
         ]
 

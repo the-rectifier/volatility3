@@ -27,7 +27,7 @@ class ProducerMetadata(interfaces.symbols.MetadataInterface):
     @property
     def version(self) -> Optional[Tuple[int]]:
         """Returns the version of the ISF file producer"""
-        version = self.version_string()
+        version = self.version_string
         if not version:
             return None
         if all(x in "0123456789." for x in version):

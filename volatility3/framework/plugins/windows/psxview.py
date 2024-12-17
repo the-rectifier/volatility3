@@ -62,7 +62,7 @@ class PsXView(plugins.PluginInterface):
                 name="thrdscan", component=thrdscan.ThrdScan, version=(1, 0, 0)
             ),
             requirements.VersionRequirement(
-                name="handles", component=handles.Handles, version=(1, 0, 0)
+                name="handles", component=handles.Handles, version=(2, 0, 0)
             ),
             requirements.BooleanRequirement(
                 name="physical-offsets",
