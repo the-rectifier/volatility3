@@ -28,7 +28,7 @@ class PsScan(interfaces.plugins.PluginInterface):
     """Scans for processes present in a particular linux image."""
 
     _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 1)
+    _version = (1, 1, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -52,10 +52,7 @@ class PsScan(interfaces.plugins.PluginInterface):
         """
         pid = task.tgid
         tid = task.pid
-        ppid = 0
-
-        if task.parent.is_readable():
-            ppid = task.parent.tgid
+        ppid = task.get_parent_pid()
         name = utility.array_to_string(task.comm)
         exit_state = DescExitStateEnum(task.exit_state).name
 

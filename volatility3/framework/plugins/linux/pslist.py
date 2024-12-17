@@ -18,7 +18,7 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
     """Lists the processes present in a particular linux memory image."""
 
     _required_framework_version = (2, 0, 0)
-    _version = (3, 0, 0)
+    _version = (3, 1, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -95,7 +95,7 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
         """
         pid = task.tgid
         tid = task.pid
-        ppid = task.parent.tgid if task.parent else 0
+        ppid = task.get_parent_pid()
         name = utility.array_to_string(task.comm)
         start_time = task.get_create_time()
         if decorate_comm:

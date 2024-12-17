@@ -15,7 +15,7 @@ class PsAux(plugins.PluginInterface):
     """Lists processes with their command line arguments"""
 
     _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 1)
+    _version = (1, 1, 0)
 
     @classmethod
     def get_requirements(cls):
@@ -98,14 +98,8 @@ class PsAux(plugins.PluginInterface):
         # walk the process list and report the arguments
         for task in tasks:
             pid = task.pid
-
-            try:
-                ppid = task.parent.pid
-            except exceptions.InvalidAddressException:
-                ppid = 0
-
+            ppid = task.get_parent_pid()
             name = utility.array_to_string(task.comm)
-
             args = self._get_command_line_args(task, name)
 
             yield (0, (pid, ppid, name, args))

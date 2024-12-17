@@ -17,7 +17,7 @@ class Envars(plugins.PluginInterface):
     """Lists processes with their environment variables"""
 
     _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 1)
+    _version = (1, 1, 0)
 
     @classmethod
     def get_requirements(cls):
@@ -48,15 +48,7 @@ class Envars(plugins.PluginInterface):
 
             # get process name as string
             name = utility.array_to_string(task.comm)
-
-            # try and get task parent
-            try:
-                ppid = task.parent.pid
-            except exceptions.InvalidAddressException:
-                vollog.debug(
-                    f"Unable to read parent pid for task {pid} {name}, setting ppid to 0."
-                )
-                ppid = 0
+            ppid = task.get_parent_pid()
 
             # kernel threads never have an mm as they do not have userland mappings
             try:

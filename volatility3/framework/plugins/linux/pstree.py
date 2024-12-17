@@ -13,7 +13,7 @@ class PsTree(interfaces.plugins.PluginInterface):
     ID."""
 
     _required_framework_version = (2, 0, 0)
-    _version = (1, 0, 1)
+    _version = (1, 1, 0)
 
     @classmethod
     def get_requirements(cls):
@@ -56,9 +56,9 @@ class PsTree(interfaces.plugins.PluginInterface):
         seen = set([pid])
         level = 0
         proc = self._tasks.get(pid)
-        while proc and proc.parent and proc.parent.pid not in seen:
+        while proc and proc.get_parent_pid() not in seen:
             if proc.is_thread_group_leader:
-                parent_pid = proc.parent.pid
+                parent_pid = proc.get_parent_pid()
             else:
                 parent_pid = proc.tgid
 
