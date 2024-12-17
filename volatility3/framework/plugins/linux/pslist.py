@@ -17,7 +17,7 @@ from volatility3.plugins.linux import elfs
 class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
     """Lists the processes present in a particular linux memory image."""
 
-    _required_framework_version = (2, 0, 0)
+    _required_framework_version = (2, 13, 0)
     _version = (3, 1, 0)
 
     @classmethod
