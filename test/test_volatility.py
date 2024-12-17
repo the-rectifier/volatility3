@@ -664,7 +664,8 @@ def test_linux_page_cache_inodepages(image, volatility, python):
             out,
         )
         assert os.path.exists(inode_dump_filename)
-        inode_contents = open(inode_dump_filename, "rb").read()
+        with open(inode_dump_filename, "rb") as fp:
+            inode_contents = fp.read()
         assert inode_contents.count(b"\n") > 30
         assert inode_contents.count(b"root:x:0:0:root:/root:/bin/bash") > 0
     finally:
