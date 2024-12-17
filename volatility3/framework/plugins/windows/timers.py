@@ -14,7 +14,7 @@ from volatility3.framework import (
 )
 from volatility3.framework.configuration import requirements
 from volatility3.framework.renderers import format_hints
-from volatility3.framework.symbols.windows import versions
+from volatility3.framework.symbols.windows import versions, extensions
 from volatility3.plugins.windows import ssdt, kpcrs
 
 vollog = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class Timers(interfaces.plugins.PluginInterface):
         kernel_module_name: str,
         layer_name: str,
         symbol_table: str,
-    ) -> Iterable[Tuple[str, int, str]]:
+    ) -> Iterable[extensions.KTIMER]:
         """Lists all kernel timers.
 
         Args:
