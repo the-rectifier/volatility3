@@ -64,8 +64,8 @@ def require_interface_version(*args) -> None:
             if args[1] > interface_version()[1]:
                 raise RuntimeError(
                     "Framework interface version {} is an older revision than the required version {}".format(
-                        ".".join([str(x) for x in interface_version()[0:2]]),
-                        ".".join([str(x) for x in args[0:2]]),
+                        ".".join(str(x) for x in interface_version()[0:2]),
+                        ".".join(str(x) for x in args[0:2]),
                     )
                 )
 
