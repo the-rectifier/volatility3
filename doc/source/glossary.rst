@@ -123,6 +123,11 @@ Page Table
     possible to use them as a way to map a particular address within a (potentially larger, but sparsely populated)
     virtual space to a concrete (and usually contiguous) physical space, through the process of :ref:`mapping<map>`.
 
+.. _Plugin:
+
+Plugin
+    Plugins are the "functions" of the volatility framework. They carry out algorithms on data stored in layers using objects constructed from symbols.  Broadly, plugins take in a number of TranslationLayers (the data, which is a representation of part of an image, in a specified type described by templates) and outputs a TreeGrid.
+
 .. _Pointer:
 
 Pointer
