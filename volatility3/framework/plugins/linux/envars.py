@@ -51,6 +51,8 @@ class Envars(plugins.PluginInterface):
         Args:
             context: The plugin's operational context.
             task: The task object from which to extract environment variables.
+            env_area_max_size: Maximum allowable size for the environment variables area.
+                Tasks exceeding this size will be skipped. Default is 8192.
 
         Yields:
             Tuples of (key, value) representing each environment variable.
