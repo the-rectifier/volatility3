@@ -55,7 +55,7 @@ class Check_creds(interfaces.plugins.PluginInterface):
 
         for cred_addr, pids in creds.items():
             if len(pids) > 1:
-                pid_str = ", ".join([str(pid) for pid in pids])
+                pid_str = ", ".join(str(pid) for pid in pids)
 
                 fields = [
                     format_hints.Hex(cred_addr),

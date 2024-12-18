@@ -3,12 +3,10 @@
 #
 
 import logging
-import os
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple
 
 from volatility3.framework import constants, interfaces
 from volatility3.framework.automagic import symbol_cache, symbol_finder
-from volatility3.framework.configuration import requirements
 from volatility3.framework.layers import intel, scanners
 from volatility3.framework.symbols import linux
 
@@ -143,6 +141,18 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
                 and init_task.state.cast("unsigned int") != 0
             ):
                 continue
+            elif init_task.active_mm.cast("long unsigned int") == module.get_symbol(
+                "init_mm"
+            ).address and init_task.tasks.next.cast(
+                "long unsigned int"
+            ) == init_task.tasks.prev.cast(
+                "long unsigned int"
+            ):
+                # The idle task steals `mm` from previously running task, i.e.,
+                # `init_mm` is only used as long as no CPU has ever been idle.
+                # This catches cases where we found a fragment of the
+                # unrelocated ELF file instead of the running kernel.
+                continue
 
             # This we get for free
             aslr_shift = (
@@ -161,9 +171,7 @@ class LinuxIntelStacker(interfaces.automagic.StackerLayerInterface):
             if aslr_shift & 0xFFF != 0 or kaslr_shift & 0xFFF != 0:
                 continue
             vollog.debug(
-                "Linux ASLR shift values determined: physical {:0x} virtual {:0x}".format(
-                    kaslr_shift, aslr_shift
-                )
+                f"Linux ASLR shift values determined: physical {kaslr_shift:0x} virtual {aslr_shift:0x}"
             )
             return kaslr_shift, aslr_shift
 
@@ -186,5 +194,8 @@ class LinuxSymbolFinder(symbol_finder.SymbolFinder):
     banner_config_key = "kernel_banner"
     operating_system = "linux"
     symbol_class = "volatility3.framework.symbols.linux.LinuxKernelIntermedSymbols"
-    find_aslr = lambda cls, *args: LinuxIntelStacker.find_aslr(*args)[1]
     exclusion_list = ["mac", "windows"]
+
+    @classmethod
+    def find_aslr(cls, *args):
+        return LinuxIntelStacker.find_aslr(*args)[1]

@@ -529,16 +529,16 @@ class VersionRequirement(interfaces.configuration.RequirementInterface):
         component: Type[interfaces.configuration.VersionableInterface] = None,
         version: Optional[Tuple[int, ...]] = None,
     ) -> None:
+        if version is None:
+            raise TypeError("Version cannot be None")
         if description is None:
-            description = f"Version {'.'.join([str(x) for x in version])} dependency on {component.__module__}.{component.__name__} unmet"
+            description = f"Version {'.'.join(str(x) for x in version)} dependency on {component.__module__}.{component.__name__} unmet"
         super().__init__(
             name=name, description=description, default=default, optional=optional
         )
         if component is None:
             raise TypeError("Component cannot be None")
         self._component: Type[interfaces.configuration.VersionableInterface] = component
-        if version is None:
-            raise TypeError("Version cannot be None")
         self._version = version
 
     def unsatisfied(
@@ -664,9 +664,7 @@ class ModuleRequirement(
         if value is not None:
             vollog.log(
                 constants.LOGLEVEL_V,
-                "TypeError - Module Requirement only accepts string labels: {}".format(
-                    repr(value)
-                ),
+                f"TypeError - Module Requirement only accepts string labels: {repr(value)}",
             )
             return {config_path: self}
 

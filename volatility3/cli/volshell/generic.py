@@ -203,7 +203,7 @@ class Volshell(interfaces.plugins.PluginInterface):
                 connector = " "
                 if chunk_size < 2:
                     connector = ""
-                ascii_data = connector.join([self._ascii_bytes(x) for x in valid_data])
+                ascii_data = connector.join(self._ascii_bytes(x) for x in valid_data)
 
             print(hex(offset), "  ", hex_data, "  ", ascii_data)
             offset += 16
@@ -585,7 +585,6 @@ class NullFileHandler(io.BytesIO, interfaces.plugins.FileHandlerInterface):
 
     def writelines(self, lines: Iterable[bytes]):
         """Dummy method"""
-        pass
 
     def write(self, b: bytes):
         """Dummy method"""
