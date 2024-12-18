@@ -641,7 +641,7 @@ class task_struct(generic.GenericIntelProcess):
         """
 
         if self.real_parent and self.real_parent.is_readable():
-            ppid = self.real_parent.pid
+            ppid = self.real_parent.tgid
         else:
             ppid = 0
 
