@@ -61,9 +61,7 @@ Map, mapping
     of the :ref:`Range<range>`).  Mappings can be seen as a mathematical function, and therefore volatility 3
     attempts to use mathematical functional notation where possible.  Within volatility a mapping is most often
     used to refer to the function for translating addresses from a higher layer (domain) to a lower layer (range).
-    For further information, please see
-    `https://en.wikipedia.org/wiki/Function_(mathematics)`.
-
+    For further information, please see `[Function (mathematics) in Wikipedia](https://en.wikipedia.org/wiki/Function_(mathematics))`.
 
 .. _Member:
 
