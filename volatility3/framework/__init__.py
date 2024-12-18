@@ -12,7 +12,7 @@ import inspect
 import logging
 import os
 import traceback
-from typing import Any, Dict, Generator, List, Tuple, Type, TypeVar
+from typing import Any, Dict, Generator, List, Optional, Tuple, Type, TypeVar
 
 from volatility3.framework import constants, interfaces
 
@@ -58,7 +58,7 @@ class NonInheritable:
         self.default_value = value
         self.cls = cls
 
-    def __get__(self, obj: Any, get_type: Type = None) -> Any:
+    def __get__(self, obj: Any, get_type: Type = Optional[None]) -> Any:
         if type is self.cls:
             if hasattr(self.default_value, "__get__"):
                 return self.default_value.__get__(obj, get_type)
@@ -185,8 +185,7 @@ def _zipwalk(path: str):
                 zip_results[os.path.join(path, os.path.dirname(file.filename))] = (
                     dirlist
                 )
-    for value in zip_results:
-        yield value, zip_results[value]
+    yield from zip_results.items()
 
 
 def list_plugins() -> Dict[str, Type[interfaces.plugins.PluginInterface]]:

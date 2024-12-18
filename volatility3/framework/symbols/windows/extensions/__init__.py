@@ -692,7 +692,9 @@ class EPROCESS(generic.GenericIntelProcess, pool.ExecutiveObject):
 
         return True
 
-    def add_process_layer(self, config_prefix: str = None, preferred_name: str = None):
+    def add_process_layer(
+        self, config_prefix: Optional[str] = None, preferred_name: Optional[str] = None
+    ):
         """Constructs a new layer based on the process's DirectoryTableBase."""
 
         parent_layer = self._context.layers[self.vol.layer_name]

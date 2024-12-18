@@ -308,7 +308,7 @@ class module(generic.GenericIntelProcess):
 
 class task_struct(generic.GenericIntelProcess):
     def add_process_layer(
-        self, config_prefix: str = None, preferred_name: str = None
+        self, config_prefix: Optional[str] = None, preferred_name: Optional[str] = None
     ) -> Optional[str]:
         """Constructs a new layer based on the process's DTB.
 

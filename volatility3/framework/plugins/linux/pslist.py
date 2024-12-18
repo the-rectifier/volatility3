@@ -2,7 +2,7 @@
 # which is available at https://www.volatilityfoundation.org/license/vsl-v1.0
 #
 import datetime
-from typing import Any, Callable, Iterable, List, Tuple
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 
 from volatility3.framework import interfaces, renderers
 from volatility3.framework.configuration import requirements
@@ -58,7 +58,9 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
         ]
 
     @classmethod
-    def create_pid_filter(cls, pid_list: List[int] = None) -> Callable[[Any], bool]:
+    def create_pid_filter(
+        cls, pid_list: Optional[List[int]] = None
+    ) -> Callable[[Any], bool]:
         """Constructs a filter function for process IDs.
 
         Args:

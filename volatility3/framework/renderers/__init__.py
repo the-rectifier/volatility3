@@ -214,7 +214,7 @@ class TreeGrid(interfaces.renderers.TreeGrid):
 
     def populate(
         self,
-        function: interfaces.renderers.VisitorSignature = None,
+        function: Optional[interfaces.renderers.VisitorSignature] = None,
         initial_accumulator: Any = None,
         fail_on_errors: bool = True,
     ) -> Optional[Exception]:

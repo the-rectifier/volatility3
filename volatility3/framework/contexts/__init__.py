@@ -229,7 +229,7 @@ class Module(interfaces.context.ModuleInterface):
     def object(
         self,
         object_type: str,
-        offset: int = None,
+        offset: Optional[int] = None,
         native_layer_name: Optional[str] = None,
         absolute: bool = False,
         **kwargs,
