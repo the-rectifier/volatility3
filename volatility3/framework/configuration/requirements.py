@@ -111,7 +111,7 @@ class ListRequirement(interfaces.configuration.RequirementInterface):
 
         Args:
             element_type: The (requirement) type of each element within the list
-            max_elements; The maximum number of acceptable elements this list can contain
+            max_elements: The maximum number of acceptable elements this list can contain
             min_elements: The minimum number of acceptable elements this list can contain
         """
         super().__init__(*args, **kwargs)
