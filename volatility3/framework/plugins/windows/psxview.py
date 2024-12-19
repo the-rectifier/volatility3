@@ -25,7 +25,7 @@ class PsXView(plugins.PluginInterface):
     identify processes that are trying to hide themselves. I recommend using -r pretty if you are looking at this
     plugin's output in a terminal."""
 
-    # I've omitted the desktop thread scanning method because Volatility3 doesn't appear to have the funcitonality
+    # I've omitted the desktop thread scanning method because Volatility3 doesn't appear to have the functionality
     # which the original plugin used to do it.
 
     # The sessions method is omitted because it begins with the list of processes found by Pslist anyway.
