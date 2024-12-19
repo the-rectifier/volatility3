@@ -117,7 +117,7 @@ class DllList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                         mod_re = re.compile(self.config["name"], flags)
                     except re.error:
                         vollog.debug(
-                            f"Error parsing regular expression: {self.config["name"]}"
+                            f'Error parsing regular expression: {self.config["name"]}'
                         )
                         return None
 
@@ -138,7 +138,7 @@ class DllList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
 
                 if dll_load_time_field:
                     # Versions prior to 6.1 won't have the LoadTime attribute
-                    # and 32bit version shouldn't have the Quadpart according to MSDN
+                    # and 32-bit version shouldn't have the Quadpart according to MSDN
                     try:
                         DllLoadTime = conversion.wintime_to_datetime(
                             entry.LoadTime.QuadPart
