@@ -17,8 +17,6 @@ from volatility3.framework.symbols.windows.extensions import pe, shimcache
 from volatility3.plugins import timeliner
 from volatility3.plugins.windows import modules, pslist, vadinfo
 
-# from volatility3.plugins.windows import pslist, vadinfo, modules
-
 vollog = logging.getLogger(__name__)
 
 
