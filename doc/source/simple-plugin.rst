@@ -52,7 +52,7 @@ to be able to run properly.  Any that are defined as optional need not necessari
                                                    version = (2, 0, 0))]
 
 
-This is a classmethod, because it is called before the specific plugin object has been instantiated (in order to know how
+This is a classmethod, so it can be called before the specific plugin object has been instantiated (in order to know how
 to instantiate the plugin).  At the moment these requirements are fairly straightforward:
 
 ::
