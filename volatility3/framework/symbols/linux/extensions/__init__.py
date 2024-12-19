@@ -641,7 +641,7 @@ class task_struct(generic.GenericIntelProcess):
         """
 
         if self.real_parent and self.real_parent.is_readable():
-            ppid = self.real_parent.pid
+            ppid = self.real_parent.tgid
         else:
             ppid = 0
 
@@ -2079,13 +2079,40 @@ class cred(objects.StructType):
         return int(value)
 
     @property
-    def euid(self):
+    def uid(self) -> int:
+        """Returns the real user ID
+
+        Returns:
+            The real user ID value
+        """
+        return self._get_cred_int_value("uid")
+
+    @property
+    def gid(self) -> int:
+        """Returns the real user ID
+
+        Returns:
+            The real user ID value
+        """
+        return self._get_cred_int_value("gid")
+
+    @property
+    def euid(self) -> int:
         """Returns the effective user ID
+
+        Returns:
+            The effective user ID value
+        """
+        return self._get_cred_int_value("euid")
+
+    @property
+    def egid(self) -> int:
+        """Returns the effective group ID
 
         Returns:
             int: the effective user ID value
         """
-        return self._get_cred_int_value("euid")
+        return self._get_cred_int_value("egid")
 
 
 class kernel_cap_struct(objects.StructType):
