@@ -42,6 +42,11 @@ jobs:
 
     - name: Testing...
       run: |
+        # VolShell
+        pytest ./test/test_volatility.py --volatility=volshell.py --image-dir=./test_images -k test_windows_volshell -v
+        pytest ./test/test_volatility.py --volatility=volshell.py --image-dir=./test_images -k test_linux_volshell -v
+
+        # Volatility
         pytest ./test/test_volatility.py --volatility=vol.py --image-dir=./test_images -k test_windows -v
         pytest ./test/test_volatility.py --volatility=vol.py --image-dir=./test_images -k test_linux -v
 
