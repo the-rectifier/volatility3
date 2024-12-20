@@ -39,7 +39,9 @@ def runvol(args, volatility, python):
     return p.returncode, stdout, stderr
 
 
-def runvol_plugin(plugin, img, volatility, python, pluginargs=[], globalargs=[]):
+def runvol_plugin(plugin, img, volatility, python, pluginargs=None, globalargs=None):
+    pluginargs = pluginargs or []
+    globalargs = globalargs or []
     args = (
         globalargs
         + [
@@ -54,7 +56,9 @@ def runvol_plugin(plugin, img, volatility, python, pluginargs=[], globalargs=[])
     return runvol(args, volatility, python)
 
 
-def runvolshell(img, volshell, python, volshellargs=[], globalargs=[]):
+def runvolshell(img, volshell, python, volshellargs=None, globalargs=None):
+    volshellargs = volshellargs or []
+    globalargs = globalargs or []
     args = (
         globalargs
         + [
