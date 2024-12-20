@@ -39,7 +39,9 @@ def runvol(args, volatility, python):
     return p.returncode, stdout, stderr
 
 
-def runvol_plugin(plugin, img, volatility, python, pluginargs=[], globalargs=[]):
+def runvol_plugin(plugin, img, volatility, python, pluginargs=None, globalargs=None):
+    pluginargs = pluginargs or []
+    globalargs = globalargs or []
     args = (
         globalargs
         + [
@@ -54,11 +56,66 @@ def runvol_plugin(plugin, img, volatility, python, pluginargs=[], globalargs=[])
     return runvol(args, volatility, python)
 
 
+def runvolshell(img, volshell, python, volshellargs=None, globalargs=None):
+    volshellargs = volshellargs or []
+    globalargs = globalargs or []
+    args = (
+        globalargs
+        + [
+            "--single-location",
+            img,
+            "-q",
+        ]
+        + volshellargs
+    )
+
+    return runvol(args, volshell, python)
+
+
 #
 # TESTS
 #
 
+
+def basic_volshell_test(image, volatility, python, globalargs):
+    # Basic VolShell test to verify requirements and ensure VolShell runs without crashing
+
+    volshell_commands = [
+        "print(ps())",
+        "exit()",
+    ]
+
+    # FIXME: When the minimum Python version includes 3.12, replace the following with:
+    # with tempfile.NamedTemporaryFile(delete_on_close=False) as fd: ...
+    fd, filename = tempfile.mkstemp(suffix=".txt")
+    try:
+        volshell_script = "\n".join(volshell_commands)
+        with os.fdopen(fd, "w") as f:
+            f.write(volshell_script)
+
+        rc, out, _err = runvolshell(
+            img=image,
+            volshell=volatility,
+            python=python,
+            volshellargs=["--script", filename],
+            globalargs=globalargs,
+        )
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(filename)
+
+    assert rc == 0
+    assert out.count(b"\n") >= 4
+
+    return out
+
+
 # WINDOWS
+
+
+def test_windows_volshell(image, volatility, python):
+    out = basic_volshell_test(image, volatility, python, globalargs=["-w"])
+    assert out.count(b"<EPROCESS") > 40
 
 
 def test_windows_pslist(image, volatility, python):
@@ -330,6 +387,11 @@ def test_windows_vadyarascan_yara_string(image, volatility, python):
 
 
 # LINUX
+
+
+def test_linux_volshell(image, volatility, python):
+    out = basic_volshell_test(image, volatility, python, globalargs=["-l"])
+    assert out.count(b"<task_struct") > 100
 
 
 def test_linux_pslist(image, volatility, python):
@@ -768,6 +830,10 @@ def test_linux_hidden_modules(image, volatility, python):
 
 
 # MAC
+
+
+def test_mac_volshell(image, volatility, python):
+    basic_volshell_test(image, volatility, python, globalargs=["-m"])
 
 
 def test_mac_pslist(image, volatility, python):
