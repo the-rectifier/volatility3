@@ -41,7 +41,7 @@ class SvcList(svcscan.SvcScan):
     @classmethod
     def _get_exe_range(cls, proc) -> Optional[Tuple[int, int]]:
         """
-        Returns a tuple of starting,ending address for
+        Returns a tuple of starting address and size of the
         the VAD containing services.exe
         """
 
