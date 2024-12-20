@@ -69,9 +69,6 @@ include = ["volatility3*"]
 mypy_path = "./stubs"
 show_traceback = true
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-
 [tool.ruff]
 line-length = 88
 target-version = "py38"
