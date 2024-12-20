@@ -117,7 +117,7 @@ class DllList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                         mod_re = re.compile(self.config["name"], flags)
                     except re.error:
                         vollog.debug(
-                            f'Error parsing regular expression: {self.config["name"]}'
+                            "Error parsing regular expression: %s", self.config["name"]
                         )
                         return None
 
