@@ -362,7 +362,7 @@ class OBJECT_HEADER(objects.StructType):
         return True
 
     def get_object_type(
-        self, type_map: Dict[int, str], cookie: int = None
+        self, type_map: Dict[int, str], cookie: Optional[int] = None
     ) -> Optional[str]:
         """Across all Windows versions, the _OBJECT_HEADER embeds details on
         the type of object (i.e. process, file) but the way its embedded

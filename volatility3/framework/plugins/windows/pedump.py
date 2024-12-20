@@ -93,7 +93,7 @@ class PEDump(interfaces.plugins.PluginInterface):
         pe_table_name: str,
         ldr_entry: interfaces.objects.ObjectInterface,
         open_method: Type[interfaces.plugins.FileHandlerInterface],
-        layer_name: str = None,
+        layer_name: Optional[str] = None,
         prefix: str = "",
     ) -> Optional[str]:
         """Extracts the PE file referenced an LDR_DATA_TABLE_ENTRY (DLL, kernel module) instance

@@ -256,6 +256,7 @@ class SymbolSpaceInterface(collections.abc.Mapping):
     """An interface for the container that holds all the symbol-containing
     tables for use within a context."""
 
+    @abstractmethod
     def free_table_name(self, prefix: str = "layer") -> str:
         """Returns an unused table name to ensure no collision occurs when
         inserting a symbol table."""

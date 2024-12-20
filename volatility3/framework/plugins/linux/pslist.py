@@ -74,7 +74,9 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
         ]
 
     @classmethod
-    def create_pid_filter(cls, pid_list: List[int] = None) -> Callable[[Any], bool]:
+    def create_pid_filter(
+        cls, pid_list: Optional[List[int]] = None
+    ) -> Callable[[Any], bool]:
         """Constructs a filter function for process IDs.
 
         Args:

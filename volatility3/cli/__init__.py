@@ -19,7 +19,7 @@ import os
 import sys
 import tempfile
 import traceback
-from typing import Any, Dict, List, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 from urllib import parse, request
 
 try:
@@ -64,7 +64,7 @@ class PrintedProgress:
     def __init__(self):
         self._max_message_len = 0
 
-    def __call__(self, progress: Union[int, float], description: str = None):
+    def __call__(self, progress: Union[int, float], description: Optional[str] = None):
         """A simple function for providing text-based feedback.
 
         .. warning:: Only for development use.
@@ -81,7 +81,7 @@ class PrintedProgress:
 class MuteProgress(PrintedProgress):
     """A dummy progress handler that produces no output when called."""
 
-    def __call__(self, progress: Union[int, float], description: str = None):
+    def __call__(self, progress: Union[int, float], description: Optional[str] = None):
         pass
 
 

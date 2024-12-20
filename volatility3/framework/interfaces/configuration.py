@@ -82,7 +82,7 @@ class HierarchicalDict(collections.abc.Mapping):
 
     def __init__(
         self,
-        initial_dict: Dict[str, "SimpleTypeRequirement"] = None,
+        initial_dict: Optional[Dict[str, "SimpleTypeRequirement"]] = None,
         separator: str = CONFIG_SEPARATOR,
     ) -> None:
         """
@@ -328,7 +328,7 @@ class RequirementInterface(metaclass=ABCMeta):
     def __init__(
         self,
         name: str,
-        description: str = None,
+        description: Optional[str] = None,
         default: ConfigSimpleType = None,
         optional: bool = False,
     ) -> None:
@@ -618,7 +618,7 @@ class ConstructableRequirementInterface(RequirementInterface):
         self,
         context: "interfaces.context.ContextInterface",
         config_path: str,
-        requirement_dict: Dict[str, object] = None,
+        requirement_dict: Optional[Dict[str, object]] = None,
     ) -> Optional["interfaces.objects.ObjectInterface"]:
         """Constructs the class, handing args and the subrequirements as
         parameters to __init__"""
@@ -652,6 +652,7 @@ class ConstructableRequirementInterface(RequirementInterface):
 class ConfigurableRequirementInterface(RequirementInterface):
     """Simple Abstract class to provide build_required_config."""
 
+    @abstractmethod
     def build_configuration(
         self,
         context: "interfaces.context.ContextInterface",
