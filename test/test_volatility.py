@@ -73,7 +73,7 @@ def runvolshell(img, volshell, python, volshellargs=[], globalargs=[]):
 #
 
 
-def basic_volshell_test(image, volatility, python):
+def basic_volshell_test(image, volatility, python, globalargs):
     # Basic VolShell test to verify requirements and ensure VolShell runs without crashing
 
     # FIXME: When the minimum Python version includes 3.12, replace the following with:
@@ -88,6 +88,7 @@ def basic_volshell_test(image, volatility, python):
             volshell=volatility,
             python=python,
             volshellargs=["--script", filename],
+            globalargs=globalargs,
         )
     finally:
         with contextlib.suppress(FileNotFoundError):
@@ -101,7 +102,7 @@ def basic_volshell_test(image, volatility, python):
 
 
 def test_windows_volshell(image, volatility, python):
-    basic_volshell_test(image, volatility, python)
+    basic_volshell_test(image, volatility, python, globalargs=["-w"])
 
 
 def test_windows_pslist(image, volatility, python):
@@ -376,7 +377,7 @@ def test_windows_vadyarascan_yara_string(image, volatility, python):
 
 
 def test_linux_volshell(image, volatility, python):
-    basic_volshell_test(image, volatility, python)
+    basic_volshell_test(image, volatility, python, globalargs=["-l"])
 
 
 def test_linux_pslist(image, volatility, python):
@@ -818,7 +819,7 @@ def test_linux_hidden_modules(image, volatility, python):
 
 
 def test_mac_volshell(image, volatility, python):
-    basic_volshell_test(image, volatility, python)
+    basic_volshell_test(image, volatility, python, globalargs=["-m"])
 
 
 def test_mac_pslist(image, volatility, python):
