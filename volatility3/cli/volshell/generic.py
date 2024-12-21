@@ -11,17 +11,17 @@ import sys
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 from urllib import parse, request
 
-from volatility3.cli import text_renderer, volshell
-from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
-from volatility3.framework.configuration import requirements
-from volatility3.framework.layers import intel, physical, resources, scanners
-
 try:
     import capstone
 
     has_capstone = True
 except ImportError:
     has_capstone = False
+
+from volatility3.cli import text_renderer, volshell
+from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
+from volatility3.framework.configuration import requirements
+from volatility3.framework.layers import intel, physical, resources, scanners
 
 
 class Volshell(interfaces.plugins.PluginInterface):
@@ -553,17 +553,16 @@ class Volshell(interfaces.plugins.PluginInterface):
             if argname in kwargs:
                 del kwargs[argname]
 
-        for keyword in kwargs:
-            val = kwargs[keyword]
-            if not isinstance(
-                val, interfaces.configuration.BasicTypes
-            ) and not isinstance(val, list):
-                if not isinstance(val, list) or all(
-                    isinstance(x, interfaces.configuration.BasicTypes) for x in val
-                ):
-                    raise TypeError(
-                        "Configurable values must be simple types (int, bool, str, bytes)"
-                    )
+        for keyword, val in kwargs.items():
+            BasicType_or_list_of_BasicType = False  # excludes list of lists
+            if isinstance(val, interfaces.configuration.BasicTypes):
+                BasicType_or_list_of_BasicType = True
+            if all(isinstance(x, interfaces.configuration.BasicTypes) for x in val):
+                BasicType_or_list_of_BasicType = True
+            if not BasicType_or_list_of_BasicType:
+                raise TypeError(
+                    "Configurable values must be simple types (int, bool, str, bytes)"
+                )
             self.context.config[config_path + "." + keyword] = val
 
         constructed = clazz(self.context, config_path, **constructor_args)
