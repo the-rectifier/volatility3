@@ -86,7 +86,9 @@ class SuspendedThreads(interfaces.plugins.PluginInterface):
                     continue
 
                 # Nothing useful to report if a process doesn't have VADs.. Also a sign of smear/terminated
-                vads = pe_symbols.PESymbols.get_vads_for_process_cache(vads_cache, owner_proc)
+                vads = pe_symbols.PESymbols.get_vads_for_process_cache(
+                    vads_cache, owner_proc
+                )
                 if not vads:
                     continue
 
@@ -144,4 +146,3 @@ class SuspendedThreads(interfaces.plugins.PluginInterface):
             ],
             self._generator(),
         )
-
