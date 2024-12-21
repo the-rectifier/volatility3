@@ -200,8 +200,7 @@ class module(generic.GenericIntelProcess):
             count=num_sects,
         )
 
-        for attr in arr:
-            yield attr
+        yield from arr
 
     def get_elf_table_name(self):
         elf_table_name = intermed.IntermediateSymbolTable.create(
@@ -237,8 +236,7 @@ class module(generic.GenericIntelProcess):
             count=self.num_symtab + 1,
         )
         if self.section_strtab:
-            for sym in syms:
-                yield sym
+            yield from syms
 
     def get_symbols_names_and_addresses(self) -> Iterable[Tuple[str, int]]:
         """Get names and addresses for each symbol of the module
@@ -310,7 +308,7 @@ class module(generic.GenericIntelProcess):
 
 class task_struct(generic.GenericIntelProcess):
     def add_process_layer(
-        self, config_prefix: str = None, preferred_name: str = None
+        self, config_prefix: Optional[str] = None, preferred_name: Optional[str] = None
     ) -> Optional[str]:
         """Constructs a new layer based on the process's DTB.
 
@@ -634,6 +632,20 @@ class task_struct(generic.GenericIntelProcess):
         # timens_add_boottime_ns(), it's not needed here since we're seeing it from the
         # root time namespace, not within the task's own time namespace
         return boottime + task_start_time_timedelta
+
+    def get_parent_pid(self) -> int:
+        """Returns the parent process ID (PPID)
+
+        This method replicates the Linux kernel's `getppid` syscall behavior.
+        Avoid using `task.parent`; instead, use this function for accurate results.
+        """
+
+        if self.real_parent and self.real_parent.is_readable():
+            ppid = self.real_parent.tgid
+        else:
+            ppid = 0
+
+        return ppid
 
 
 class fs_struct(objects.StructType):
@@ -1107,8 +1119,15 @@ class dentry(objects.StructType):
             walk_member = "d_sib"
             list_head_member = self.d_children
         elif self.has_member("d_child") and self.has_member("d_subdirs"):
-            # 2.5.0 <= kernels < 6.8
+            # 3.19.0 <= kernels < 6.8
             walk_member = "d_child"
+            list_head_member = self.d_subdirs
+        elif self.has_member("d_u") and self.has_member("d_subdirs"):
+            # kernels < 3.19
+
+            # Actually, 'd_u.d_child' but to_list() doesn't support something like that.
+            # Since, it's an union, everything is at the same offset than 'd_u'.
+            walk_member = "d_u"
             list_head_member = self.d_subdirs
         else:
             raise exceptions.VolatilityException("Unsupported dentry type")
@@ -1462,7 +1481,7 @@ class mount(objects.StructType):
 
     def next_peer(self):
         table_name = self.vol.type_name.split(constants.BANG)[0]
-        mount_struct = "{0}{1}mount".format(table_name, constants.BANG)
+        mount_struct = f"{table_name}{constants.BANG}mount"
         offset = self._context.symbol_space.get_type(
             mount_struct
         ).relative_child_offset("mnt_share")
@@ -2060,13 +2079,40 @@ class cred(objects.StructType):
         return int(value)
 
     @property
-    def euid(self):
+    def uid(self) -> int:
+        """Returns the real user ID
+
+        Returns:
+            The real user ID value
+        """
+        return self._get_cred_int_value("uid")
+
+    @property
+    def gid(self) -> int:
+        """Returns the real user ID
+
+        Returns:
+            The real user ID value
+        """
+        return self._get_cred_int_value("gid")
+
+    @property
+    def euid(self) -> int:
         """Returns the effective user ID
+
+        Returns:
+            The effective user ID value
+        """
+        return self._get_cred_int_value("euid")
+
+    @property
+    def egid(self) -> int:
+        """Returns the effective group ID
 
         Returns:
             int: the effective user ID value
         """
-        return self._get_cred_int_value("euid")
+        return self._get_cred_int_value("egid")
 
 
 class kernel_cap_struct(objects.StructType):
@@ -2480,7 +2526,7 @@ class address_space(objects.StructType):
 
 class page(objects.StructType):
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def pageflags_enum(self) -> Dict:
         """Returns 'pageflags' enumeration key/values
 
@@ -2658,8 +2704,7 @@ class IDR(objects.StructType):
         id_storage = linux.IDStorage.choose_id_storage(
             self._context, kernel_module_name="kernel"
         )
-        for page_addr in id_storage.get_entries(root=self.idr_rt):
-            yield page_addr
+        yield from id_storage.get_entries(root=self.idr_rt)
 
     def get_entries(self) -> Iterable[int]:
         """Walks the IDR and yield a pointer associated with each element.
@@ -2677,8 +2722,7 @@ class IDR(objects.StructType):
             # Kernels < 4.11
             get_entries_func = self._old_kernel_get_entries
 
-        for page_addr in get_entries_func():
-            yield page_addr
+        yield from get_entries_func()
 
 
 class rb_root(objects.StructType):

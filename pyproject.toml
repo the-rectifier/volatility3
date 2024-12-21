@@ -36,6 +36,7 @@ dev = [
     "jsonschema>=4.23.0,<5",
     "pyinstaller>=6.11.0,<7",
     "pyinstaller-hooks-contrib>=2024.9",
+    "types-jsonschema>=4.23.0,<5",
 ]
 
 test = [
@@ -71,9 +72,6 @@ include = ["volatility3*"]
 [tool.mypy]
 mypy_path = "./stubs"
 show_traceback = true
-
-[tool.mypy.overrides]
-ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 88
