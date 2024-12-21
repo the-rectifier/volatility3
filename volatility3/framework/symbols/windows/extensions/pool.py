@@ -217,7 +217,7 @@ class POOL_HEADER(objects.StructType):
                         yield mem_object
 
     @classmethod
-    @functools.lru_cache()
+    @functools.lru_cache
     def _calculate_optional_header_lengths(
         cls, context: interfaces.context.ContextInterface, symbol_table_name: str
     ) -> Tuple[List[str], List[int]]:
@@ -362,7 +362,7 @@ class OBJECT_HEADER(objects.StructType):
         return True
 
     def get_object_type(
-        self, type_map: Dict[int, str], cookie: int = None
+        self, type_map: Dict[int, str], cookie: Optional[int] = None
     ) -> Optional[str]:
         """Across all Windows versions, the _OBJECT_HEADER embeds details on
         the type of object (i.e. process, file) but the way its embedded
@@ -430,9 +430,7 @@ class OBJECT_HEADER(objects.StructType):
 
         if header_offset == 0:
             raise ValueError(
-                "Could not find _OBJECT_HEADER_NAME_INFO for object at {} of layer {}".format(
-                    self.vol.offset, self.vol.layer_name
-                )
+                f"Could not find _OBJECT_HEADER_NAME_INFO for object at {self.vol.offset} of layer {self.vol.layer_name}"
             )
 
         header = ntkrnlmp.object(

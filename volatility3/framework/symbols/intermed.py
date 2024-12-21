@@ -86,7 +86,7 @@ class IntermediateSymbolTable(interfaces.symbols.SymbolTableInterface):
         config_path: str,
         name: str,
         isf_url: str,
-        native_types: interfaces.symbols.NativeTableInterface = None,
+        native_types: Optional[interfaces.symbols.NativeTableInterface] = None,
         table_mapping: Optional[Dict[str, str]] = None,
         validate: bool = True,
         class_types: Optional[
@@ -171,7 +171,7 @@ class IntermediateSymbolTable(interfaces.symbols.SymbolTableInterface):
         (indicating that only additive   changes have been made) than
         the consumer (in this case, the file reader).
         """
-        major, minor, patch = [int(x) for x in version.split(".")]
+        major, minor, patch = (int(x) for x in version.split("."))
         supported_versions = [x for x in versions if x[0] == major and x[1] >= minor]
         if not supported_versions:
             raise ValueError(
@@ -319,7 +319,7 @@ class ISFormatTable(interfaces.symbols.SymbolTableInterface, metaclass=ABCMeta):
         config_path: str,
         name: str,
         json_object: Any,
-        native_types: interfaces.symbols.NativeTableInterface = None,
+        native_types: Optional[interfaces.symbols.NativeTableInterface] = None,
         table_mapping: Optional[Dict[str, str]] = None,
     ) -> None:
         self._json_object = json_object

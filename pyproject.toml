@@ -32,11 +32,13 @@ dev = [
     "jsonschema>=4.23.0,<5",
     "pyinstaller>=6.11.0,<7",
     "pyinstaller-hooks-contrib>=2024.9",
+    "types-jsonschema>=4.23.0,<5",
 ]
 
 test = [
     "volatility3[dev]",
     "pytest>=8.3.3,<9",
+    "capstone>=5.0.3,<6",
     "yara-x>=0.10.0,<1",
 ]
 
@@ -67,8 +69,23 @@ include = ["volatility3*"]
 mypy_path = "./stubs"
 show_traceback = true
 
-[tool.mypy.overrides]
-ignore_missing_imports = true
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+	"F",       # pyflakes
+	"E",       # pycodestyle errors
+	"W",       # pycodestyle warnings
+	"G",       # flake8-logging-format
+	"PIE",     # flake8-pie
+	"UP",      # pyupgrade
+]
+
+ignore = [
+    "E501",    # ignore due to conflict with formatter
+]
 
 [build-system]
 requires = ["setuptools>=68"]
