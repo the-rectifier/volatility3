@@ -218,7 +218,7 @@ class Fbdev(interfaces.plugins.PluginInterface):
             fourcc = linux.LinuxUtilities.convert_fourcc_code(fb_info.var.grayscale)
             warn_msg = f"""Framebuffer "{id}" uses a FOURCC pixel format "{fourcc}" that isn't natively supported.
 You can try using ffmpeg to decode the raw buffer. Example usage:
-"ffmpeg -pix_fmts" to list supported formats, then 
+"ffmpeg -pix_fmts" to list supported formats, then
 "ffmpeg -f rawvideo -video_size {fb_info.var.xres_virtual}x{fb_info.var.yres_virtual} -i <FILENAME>.raw -pix_fmt <FORMAT> output.png"."""
             vollog.warning(warn_msg)
 
