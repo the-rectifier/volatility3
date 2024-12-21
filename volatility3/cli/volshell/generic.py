@@ -11,17 +11,17 @@ import sys
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 from urllib import parse, request
 
+from volatility3.cli import text_renderer, volshell
+from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
+from volatility3.framework.configuration import requirements
+from volatility3.framework.layers import intel, physical, resources, scanners
+
 try:
     import capstone
 
     has_capstone = True
 except ImportError:
     has_capstone = False
-
-from volatility3.cli import text_renderer, volshell
-from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
-from volatility3.framework.configuration import requirements
-from volatility3.framework.layers import intel, physical, resources, scanners
 
 
 class Volshell(interfaces.plugins.PluginInterface):
