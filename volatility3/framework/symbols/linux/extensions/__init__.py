@@ -279,76 +279,29 @@ class module(generic.GenericIntelProcess):
 
         return None
 
-    def _module_flags_taints_pre_4_10_rc1(self) -> str:
-        """Convert the module's taints value to a 1-1 character mapping.
-        Relies on statically defined taints mappings in the framework.
-
-        Returns:
-            The raw taints string.
-        """
-        taints_string = ""
-        for char, taint_flag in linux_constants.TAINT_FLAGS.items():
-            if taint_flag.module and self.taints & taint_flag.shift:
-                taints_string += char
-
-        return taints_string
-
-    def _module_flags_taints_post_4_10_rc1(self) -> str:
-        """Convert the module's taints value to a 1-1 character mapping.
-        Relies on kernel symbol embedded taints definitions.
-
-            struct taint_flag {
-                char c_true;		/* character printed when tainted */
-                char c_false;		/* character printed when not tainted */
-                bool module;		/* also show as a per-module taint flag */
-            };
-
-        Returns:
-            The raw taints string.
-        """
-        taints_string = ""
-        for i, taint_flag in enumerate(self.taint_flags_list):
-            c_true = chr(taint_flag.c_true)
-            c_false = chr(taint_flag.c_false)
-            if taint_flag.module and (self.taints & (1 << i)):
-                taints_string += c_true
-            elif taint_flag.module and c_false != " ":
-                taints_string += c_false
-
-        return taints_string
-
     def get_taints_as_plain_string(self) -> str:
         """Convert the module's taints value to a 1-1 character mapping.
+        Convenient wrapper around framework's Tainting capabilities.
 
         Returns:
             The raw taints string.
-
-        Documentation:
-            - module_flags_taint kernel function
         """
-
-        if self.taint_flags_list:
-            return self._module_flags_taints_post_4_10_rc1()
-        return self._module_flags_taints_pre_4_10_rc1()
+        return linux.Tainting(
+            self._context,
+            linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
+        ).get_taints_as_plain_string(self.taints, True)
 
     def get_taints_parsed(self) -> List[str]:
         """Convert the module's taints string to a 1-1 descriptor mapping.
+        Convenient wrapper around framework's Tainting capabilities.
 
         Returns:
             A comprehensive (user-friendly) taint descriptor list.
-
-        Documentation:
-            - module_flags_taint kernel function
         """
-        comprehensive_taints = []
-        for character in self.get_taints_as_plain_string():
-            taint_flag = linux_constants.TAINT_FLAGS.get(character)
-            if not taint_flag:
-                comprehensive_taints.append(f"<UNKNOWN_TAINT_CHAR_{character}>")
-            elif taint_flag.when_present:
-                comprehensive_taints.append(taint_flag.desc)
-
-        return comprehensive_taints
+        return linux.Tainting(
+            self._context,
+            linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
+        ).get_taints_parsed(self.taints, True)
 
     @property
     def section_symtab(self):
@@ -375,13 +328,6 @@ class module(generic.GenericIntelProcess):
         elif self.has_member("strtab"):
             return self.strtab
         raise AttributeError("Unable to get strtab")
-
-    @property
-    def taint_flags_list(self) -> Optional[List[interfaces.objects.ObjectInterface]]:
-        kernel = linux.LinuxUtilities.get_module_from_volobj_type(self._context, self)
-        if kernel.has_symbol("taint_flags"):
-            return list(kernel.object_from_symbol("taint_flags"))
-        return None
 
 
 class task_struct(generic.GenericIntelProcess):
