@@ -173,7 +173,8 @@ class Fbdev(interfaces.plugins.PluginInterface):
         """
         kernel = context.modules[kernel_name]
         kernel_layer = context.layers[kernel.layer_name]
-        base_filename = f"{fb.id}_{fb.xres_virtual}x{fb.yres_virtual}_{fb.bpp}bpp"
+        id = "N-A" if isinstance(fb.id, NotAvailableValue) else fb.id
+        base_filename = f"{id}_{fb.xres_virtual}x{fb.yres_virtual}_{fb.bpp}bpp"
         if convert_to_png_image:
             image_object = cls.convert_fb_raw_buffer_to_image(context, kernel_name, fb)
             raw_io_output = io.BytesIO()
@@ -207,8 +208,7 @@ class Fbdev(interfaces.plugins.PluginInterface):
                 - struct fb_var_screeninfo stores device independent changeable information about a frame buffer device, its current format and video mode,
                 as well as other miscellaneous parameters.
         """
-        # NotAvailableValue() messes with the filename output on disk
-        id = utility.array_to_string(fb_info.fix.id) or "N-A"
+        id = utility.array_to_string(fb_info.fix.id) or NotAvailableValue()
         color_fields = None
 
         # 0 = color, 1 = grayscale,	>1 = FOURCC
