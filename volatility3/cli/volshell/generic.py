@@ -14,7 +14,7 @@ from urllib import parse, request
 from volatility3.cli import text_renderer, volshell
 from volatility3.framework import exceptions, interfaces, objects, plugins, renderers
 from volatility3.framework.configuration import requirements
-from volatility3.framework.layers import intel, physical, resources
+from volatility3.framework.layers import intel, physical, resources, scanners
 
 try:
     import capstone
@@ -28,6 +28,8 @@ class Volshell(interfaces.plugins.PluginInterface):
     """Shell environment to directly interact with a memory image."""
 
     _required_framework_version = (2, 0, 0)
+
+    DEFAULT_NUM_DISPLAY_BYTES = 128
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -149,6 +151,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             (["cc", "create_configurable"], self.create_configurable),
             (["lf", "load_file"], self.load_file),
             (["rs", "run_script"], self.run_script),
+            (["rx", "regex_scan"], self.regex_scan),
         ]
 
     def _construct_locals_dict(self) -> Dict[str, Any]:
@@ -200,7 +203,7 @@ class Volshell(interfaces.plugins.PluginInterface):
                 connector = " "
                 if chunk_size < 2:
                     connector = ""
-                ascii_data = connector.join([self._ascii_bytes(x) for x in valid_data])
+                ascii_data = connector.join(self._ascii_bytes(x) for x in valid_data)
 
             print(hex(offset), "  ", hex_data, "  ", ascii_data)
             offset += 16
@@ -237,7 +240,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             return None
         return self.context.modules[self.current_kernel_name]
 
-    def change_layer(self, layer_name: str = None):
+    def change_layer(self, layer_name: Optional[str] = None):
         """Changes the current default layer"""
         if not layer_name:
             layer_name = self.current_layer
@@ -247,7 +250,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             self.__current_layer = layer_name
         sys.ps1 = f"({self.current_layer}) >>> "
 
-    def change_symbol_table(self, symbol_table_name: str = None):
+    def change_symbol_table(self, symbol_table_name: Optional[str] = None):
         """Changes the current_symbol_table"""
         if not symbol_table_name:
             print("No symbol table provided, not changing current symbol table")
@@ -259,7 +262,7 @@ class Volshell(interfaces.plugins.PluginInterface):
             self.__current_symbol_table = symbol_table_name
         print(f"Current Symbol Table: {self.current_symbol_table}")
 
-    def change_kernel(self, kernel_name: str = None):
+    def change_kernel(self, kernel_name: Optional[str] = None):
         if not kernel_name:
             print("No kernel module name provided, not changing current kernel")
         if kernel_name not in self.context.modules:
@@ -268,27 +271,52 @@ class Volshell(interfaces.plugins.PluginInterface):
             self.__current_kernel_name = kernel_name
         print(f"Current kernel : {self.current_kernel_name}")
 
-    def display_bytes(self, offset, count=128, layer_name=None):
+    def display_bytes(self, offset, count=DEFAULT_NUM_DISPLAY_BYTES, layer_name=None):
         """Displays byte values and ASCII characters"""
         remaining_data = self._read_data(offset, count=count, layer_name=layer_name)
         self._display_data(offset, remaining_data)
 
-    def display_quadwords(self, offset, count=128, layer_name=None):
+    def display_quadwords(
+        self, offset, count=DEFAULT_NUM_DISPLAY_BYTES, layer_name=None
+    ):
         """Displays quad-word values (8 bytes) and corresponding ASCII characters"""
         remaining_data = self._read_data(offset, count=count, layer_name=layer_name)
         self._display_data(offset, remaining_data, format_string="Q")
 
-    def display_doublewords(self, offset, count=128, layer_name=None):
+    def display_doublewords(
+        self, offset, count=DEFAULT_NUM_DISPLAY_BYTES, layer_name=None
+    ):
         """Displays double-word values (4 bytes) and corresponding ASCII characters"""
         remaining_data = self._read_data(offset, count=count, layer_name=layer_name)
         self._display_data(offset, remaining_data, format_string="I")
 
-    def display_words(self, offset, count=128, layer_name=None):
+    def display_words(self, offset, count=DEFAULT_NUM_DISPLAY_BYTES, layer_name=None):
         """Displays word values (2 bytes) and corresponding ASCII characters"""
         remaining_data = self._read_data(offset, count=count, layer_name=layer_name)
         self._display_data(offset, remaining_data, format_string="H")
 
-    def disassemble(self, offset, count=128, layer_name=None, architecture=None):
+    def regex_scan(self, pattern, count=DEFAULT_NUM_DISPLAY_BYTES, layer_name=None):
+        """Scans for regex pattern in layer using RegExScanner."""
+        if not isinstance(pattern, bytes):
+            raise TypeError("pattern must be bytes, e.g. rx(b'pattern')")
+        layer_name_to_scan = layer_name or self.current_layer
+        for offset in self.context.layers[layer_name_to_scan].scan(
+            scanner=scanners.RegExScanner(pattern),
+            context=self.context,
+        ):
+            remaining_data = self._read_data(
+                offset, count=count, layer_name=layer_name_to_scan
+            )
+            self._display_data(offset, remaining_data)
+            print("")
+
+    def disassemble(
+        self,
+        offset,
+        count=DEFAULT_NUM_DISPLAY_BYTES,
+        layer_name=None,
+        architecture=None,
+    ):
         """Disassembles a number of instructions from the code at offset"""
         remaining_data = self._read_data(offset, count=count, layer_name=layer_name)
         if not has_capstone:
@@ -319,7 +347,7 @@ class Volshell(interfaces.plugins.PluginInterface):
         object: Union[
             str, interfaces.objects.ObjectInterface, interfaces.objects.Template
         ],
-        offset: int = None,
+        offset: Optional[int] = None,
     ):
         """Display Type describes the members of a particular object in alphabetical order"""
         if not isinstance(
@@ -451,7 +479,7 @@ class Volshell(interfaces.plugins.PluginInterface):
         if treegrid is not None:
             self.render_treegrid(treegrid)
 
-    def display_symbols(self, symbol_table: str = None):
+    def display_symbols(self, symbol_table: Optional[str] = None):
         """Prints an alphabetical list of symbols for a symbol table"""
         if symbol_table is None:
             print("No symbol table provided")
@@ -525,17 +553,16 @@ class Volshell(interfaces.plugins.PluginInterface):
             if argname in kwargs:
                 del kwargs[argname]
 
-        for keyword in kwargs:
-            val = kwargs[keyword]
-            if not isinstance(
-                val, interfaces.configuration.BasicTypes
-            ) and not isinstance(val, list):
-                if not isinstance(val, list) or all(
-                    isinstance(x, interfaces.configuration.BasicTypes) for x in val
-                ):
-                    raise TypeError(
-                        "Configurable values must be simple types (int, bool, str, bytes)"
-                    )
+        for keyword, val in kwargs.items():
+            BasicType_or_list_of_BasicType = False  # excludes list of lists
+            if isinstance(val, interfaces.configuration.BasicTypes):
+                BasicType_or_list_of_BasicType = True
+            if all(isinstance(x, interfaces.configuration.BasicTypes) for x in val):
+                BasicType_or_list_of_BasicType = True
+            if not BasicType_or_list_of_BasicType:
+                raise TypeError(
+                    "Configurable values must be simple types (int, bool, str, bytes)"
+                )
             self.context.config[config_path + "." + keyword] = val
 
         constructed = clazz(self.context, config_path, **constructor_args)
@@ -557,7 +584,6 @@ class NullFileHandler(io.BytesIO, interfaces.plugins.FileHandlerInterface):
 
     def writelines(self, lines: Iterable[bytes]):
         """Dummy method"""
-        pass
 
     def write(self, b: bytes):
         """Dummy method"""
