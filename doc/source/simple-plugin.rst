@@ -211,7 +211,10 @@ that will be output as part of the :py:class:`~volatility3.framework.interfaces.
                 ],
                 self._generator(
                     pslist.PsList.list_processes(
-                        self.context,                                                                           kernel.layer_name,                                                                      kernel.symbol_table_name,                                                               filter_func = filter_func
+                        self.context,
+                        kernel.layer_name,
+                        kernel.symbol_table_name,
+                        filter_func = filter_func
                     )
                 )
             )
