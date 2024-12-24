@@ -60,6 +60,9 @@ class Fbdev(interfaces.plugins.PluginInterface):
                 description="Linux kernel",
                 architectures=architectures.LINUX_ARCHS,
             ),
+            requirements.VersionRequirement(
+                name="linuxutils", component=linux.LinuxUtilities, version=(2, 2, 0)
+            ),
             requirements.BooleanRequirement(
                 name="dump",
                 description="Dump framebuffers",
