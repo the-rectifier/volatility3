@@ -53,7 +53,7 @@ ConfigSimpleType = Optional[Union[SimpleTypes, List[SimpleTypes]]]
 def path_join(*args) -> str:
     """Joins configuration paths together."""
     # If a path element (particularly the first) is empty, then remove it from the list
-    args = tuple([arg for arg in args if arg])
+    args = tuple(arg for arg in args if arg)
     return CONFIG_SEPARATOR.join(args)
 
 
@@ -772,8 +772,7 @@ class ConfigurableInterface(metaclass=ABCMeta):
             str: The newly generated full configuration path
         """
         random_config_dict = "".join(
-            random.SystemRandom().choice(string.ascii_uppercase + string.digits)
-            for _ in range(8)
+            random.SystemRandom().choices(string.ascii_uppercase + string.digits, k=8)
         )
         new_config_path = path_join(base_config_path, random_config_dict)
         # TODO: Check that the new_config_path is empty, although it's not critical if it's not since the values are merged in
