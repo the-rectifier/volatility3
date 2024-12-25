@@ -76,7 +76,7 @@ class LinuxKernelIntermedSymbols(intermed.IntermediateSymbolTable):
 class LinuxUtilities(interfaces.configuration.VersionableInterface):
     """Class with multiple useful linux functions."""
 
-    _version = (2, 1, 1)
+    _version = (2, 2, 0)
     _required_framework_version = (2, 0, 0)
 
     framework.require_interface_version(*_required_framework_version)
@@ -482,6 +482,22 @@ class LinuxUtilities(interfaces.configuration.VersionableInterface):
         kernel = context.modules[kernel_module_name]
 
         return kernel
+
+    @classmethod
+    def convert_fourcc_code(cls, code: int) -> str:
+        """Convert a fourcc integer back to its fourcc string representation.
+
+        Args:
+            code: the numerical representation of the fourcc
+
+        Returns:
+            The fourcc code string.
+        """
+
+        code_bytes_length = (code.bit_length() + 7) // 8
+        return "".join(
+            [chr((code >> (i * 8)) & 0xFF) for i in range(code_bytes_length)]
+        )
 
 
 class IDStorage(ABC):
