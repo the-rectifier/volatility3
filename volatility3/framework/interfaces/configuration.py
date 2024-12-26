@@ -779,9 +779,9 @@ class ConfigurableInterface(metaclass=ABCMeta):
 
         # This should check that each k corresponds to a requirement and each v is of the appropriate type
         # This would require knowledge of the new configurable itself to verify, and they should do validation in the
-        # constructor anyway, however, to prevent bad types getting into the config tree we just verify that v is a simple type
+        # constructor anyway, however, to prevent bad types getting into the config tree we just verify that v is a basic type
         for k, v in kwargs.items():
-            if not isinstance(v, (int, str, bool, float, bytes)):
+            if not isinstance(v, BasicTypes):
                 raise TypeError(
                     "Config values passed to make_subconfig can only be simple types"
                 )
