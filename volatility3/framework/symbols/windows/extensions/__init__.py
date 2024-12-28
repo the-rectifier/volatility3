@@ -424,6 +424,7 @@ class DEVICE_OBJECT(objects.StructType, pool.ExecutiveObject):
             except exceptions.InvalidAddressException:
                 return
 
+
 class DRIVER_OBJECT(objects.StructType, pool.ExecutiveObject):
     """A class for kernel driver objects."""
 
