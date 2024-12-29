@@ -340,7 +340,7 @@ class NetStat(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                 offset=tcpip_module_offset + part_table_symbol,
             )
         except exceptions.InvalidAddressException:
-            vollog.debug(f"`PartitionTable` not present in memory.")
+            vollog.debug("`PartitionTable` not present in memory.")
             return
 
         # part_table is the actual partition table offset and consists out of a dynamic amount of _PARTITION objects
@@ -358,7 +358,7 @@ class NetStat(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                 "little",
             )
         except exceptions.InvalidAddressException:
-            vollog.debug(f"`PartitionCount` not present in memory.")
+            vollog.debug("`PartitionCount` not present in memory.")
             return
 
         part_table.Partitions.count = part_count
