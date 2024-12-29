@@ -1,7 +1,7 @@
 import logging
 
 from typing import Dict
-from functools import partial
+import functools
 
 from volatility3.framework import renderers, interfaces, exceptions
 from volatility3.framework.configuration import requirements
@@ -99,7 +99,7 @@ class SuspendedThreads(interfaces.plugins.PluginInterface):
                         self.context, kernel.layer_name, kernel.symbol_table_name, None
                     )
 
-                    path_and_symbol = partial(
+                    path_and_symbol = functools.partial(
                         pe_symbols.PESymbols.path_and_symbol_for_address,
                         self.context,
                         self.config_path,
