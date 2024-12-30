@@ -1,7 +1,8 @@
 import logging
-from typing import Any, List, Optional
-from volatility3.framework import constants, interfaces
 import re
+from typing import Any, List, Optional
+
+from volatility3.framework import constants, interfaces
 
 vollog = logging.getLogger(__name__)
 
@@ -67,8 +68,8 @@ class ColumnFilter:
     ) -> None:
         self.column_num = column_num
         self.pattern = pattern
-        self.exclude = exclude
         self.regex = regex
+        self.exclude = exclude
 
     def find(self, item) -> bool:
         """Identifies whether an item is found in the appropriate column"""
