@@ -282,7 +282,6 @@ class Skeleton_Key_Check(interfaces.plugins.PluginInterface):
 
         for proc in proc_list:
             try:
-                proc_id = proc.UniqueProcessId
                 proc_layer_name = proc.add_process_layer()
 
                 return proc, proc_layer_name
