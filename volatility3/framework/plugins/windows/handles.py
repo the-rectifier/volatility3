@@ -178,7 +178,7 @@ class Handles(interfaces.plugins.PluginInterface):
             except exceptions.InvalidAddressException:
                 vollog.log(
                     constants.LOGLEVEL_VVV,
-                    f"Cannot access _OBJECT_HEADER Name at {objt.vol.offset:#x}",
+                    f"Cannot access _OBJECT_HEADER Name at {ptr.vol.offset:#x}",
                 )
                 continue
 
