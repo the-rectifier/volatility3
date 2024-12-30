@@ -226,6 +226,14 @@ class Handles(interfaces.plugins.PluginInterface):
         masked_offset = offset & layer_object.maximum_address
 
         for entry in table:
+            # This triggered a backtrace in many testing samples
+            # in the level == 0 path
+            # The code above this calls `is_valid` on the `offset`
+            # It is sent but then does not validate `entry` before
+            # sending it to `_get_item`
+            if not self.context.layers[virtual].is_valid(entry.vol.offset):
+                continue
+
             if level > 0:
                 yield from self._make_handle_array(entry, level - 1, depth)
                 depth += 1
