@@ -140,7 +140,13 @@ class RegistryHive(linear.LinearlyMappedLayer):
         """Returns the appropriate Node, interpreted from the Cell based on its
         Signature."""
         cell = self.get_cell(cell_offset)
-        signature = cell.cast("string", max_length=2, encoding="latin-1")
+        try:
+            signature = cell.cast("string", max_length=2, encoding="latin-1")
+        except (RegistryInvalidIndex, exceptions.InvalidAddressException):
+            vollog.debug(
+                f"Failed to get cell signature for cell (0x{cell.vol.offset:x})"
+            )
+            return cell
         if signature == "nk":
             return cell.u.KeyNode
         elif signature == "sk":
