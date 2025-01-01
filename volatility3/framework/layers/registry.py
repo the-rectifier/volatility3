@@ -142,12 +142,11 @@ class RegistryHive(linear.LinearlyMappedLayer):
         cell = self.get_cell(cell_offset)
         try:
             signature = cell.cast("string", max_length=2, encoding="latin-1")
-        except exceptions.InvalidAddressException:
+        except (RegistryInvalidIndex, exceptions.InvalidAddressException):
             vollog.debug(
-                f"Unable to read cell signature for cell at {cell.vol.offset:x}"
+                f"Failed to get cell signature for cell (0x{cell.vol.offset:x})"
             )
             return cell
-
         if signature == "nk":
             return cell.u.KeyNode
         elif signature == "sk":
