@@ -22,15 +22,18 @@ class Tainting(LinuxUtilityInterface):
         self,
         context: interfaces.context.ContextInterface,
         kernel_module_name: str,
+        *args,
+        **kwargs,
     ):
-        self.kernel = context.modules[kernel_module_name]
+        super().__init__(*args, **kwargs)
+        self._kernel = context.modules[kernel_module_name]
 
     @property
     def _kernel_taint_flags_list(
         self,
     ) -> Optional[List[interfaces.objects.ObjectInterface]]:
-        if self.kernel.has_symbol("taint_flags"):
-            return list(self.kernel.object_from_symbol("taint_flags"))
+        if self._kernel.has_symbol("taint_flags"):
+            return list(self._kernel.object_from_symbol("taint_flags"))
         return None
 
     def _module_flags_taint_pre_4_10_rc1(
