@@ -9,6 +9,7 @@ from volatility3.framework.configuration import requirements
 from volatility3.framework.renderers import format_hints, TreeGrid, NotAvailableValue
 from volatility3.framework.symbols.linux import extensions
 from volatility3.framework.constants import architectures
+from volatility3.framework.symbols.linux.utilities import tainting
 
 vollog = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ class Modxview(interfaces.plugins.PluginInterface):
     spot modules presence and taints."""
 
     _version = (1, 0, 0)
-    _required_framework_version = (2, 11, 0)
+    _required_framework_version = (2, 14, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -27,6 +28,9 @@ class Modxview(interfaces.plugins.PluginInterface):
                 name="kernel",
                 description="Linux kernel",
                 architectures=architectures.LINUX_ARCHS,
+            ),
+            requirements.VersionRequirement(
+                name="linux-tainting", component=tainting.Tainting, version=(1, 0, 0)
             ),
             requirements.PluginRequirement(
                 name="lsmod", plugin=lsmod.Lsmod, version=(2, 0, 0)
