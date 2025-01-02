@@ -19,7 +19,7 @@ from volatility3.framework.layers import linear
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
 from volatility3.framework.symbols.linux.extensions import elf
-
+from volatility3.framework.symbols.linux.utilities import tainting
 
 vollog = logging.getLogger(__name__)
 
@@ -286,7 +286,7 @@ class module(generic.GenericIntelProcess):
         Returns:
             The raw taints string.
         """
-        return linux.Tainting(
+        return tainting.Tainting(
             self._context,
             linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
         ).get_taints_as_plain_string(self.taints, True)
@@ -298,7 +298,7 @@ class module(generic.GenericIntelProcess):
         Returns:
             A comprehensive (user-friendly) taint descriptor list.
         """
-        return linux.Tainting(
+        return tainting.Tainting(
             self._context,
             linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
         ).get_taints_parsed(self.taints, True)
