@@ -166,7 +166,7 @@ class ABCKmsg(ABC):
 
     def get_caller_text(self, caller_id):
         caller_name = "CPU" if caller_id & 0x80000000 else "Task"
-        caller = f"{caller_name}({int(caller_id & ~0x80000000)})"
+        caller = f"{caller_name}({caller_id & ~0x80000000})"
         return caller
 
     def get_prefix(self, obj) -> Tuple[int, int, str, str]:
