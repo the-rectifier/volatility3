@@ -162,12 +162,10 @@ class CM_KEY_NODE(objects.StructType):
         """
         Returns a bool indicating whether or not the key is volatile.
 
-        Raises ValueError if the key was not instantiated on a RegistryHive layer
+        Raises TypeError if the key was not instantiated on a RegistryHive layer
         """
         if not isinstance(self._context.layers[self.vol.layer_name], RegistryHive):
-            raise ValueError(
-                "Cannot determine volatility of registry key without an offset in a RegistryHive layer"
-            )
+            raise TypeError("CM_KEY_NODE was not instantiated on a RegistryHive layer")
         return bool(self.vol.offset & 0x80000000)
 
     def get_subkeys(self) -> Iterator["CM_KEY_NODE"]:
