@@ -51,7 +51,7 @@ class Tainting(LinuxUtilityInterface):
         """
         taints_string = ""
         for char, taint_flag in linux_constants.TAINT_FLAGS.items():
-            if is_module and is_module != taint_flag.module:
+            if is_module and not taint_flag.module:
                 continue
 
             if taints & taint_flag.shift:
@@ -79,12 +79,12 @@ class Tainting(LinuxUtilityInterface):
             The raw taints string.
         """
         taints_string = ""
-        for i, taint_flag in enumerate(self._kernel_taint_flags_list):
-            if is_module and is_module != taint_flag.module:
+        for taint_bit, taint_flag in enumerate(self._kernel_taint_flags_list):
+            if is_module and not taint_flag.module:
                 continue
             c_true = chr(taint_flag.c_true)
             c_false = chr(taint_flag.c_false)
-            if taints & (1 << i):
+            if taints & (1 << taint_bit):
                 taints_string += c_true
             elif c_false != " ":
                 taints_string += c_false
@@ -97,7 +97,6 @@ class Tainting(LinuxUtilityInterface):
         Args:
             taints: The taints value, represented by an integer
             is_module: Indicates if the taints value is associated with a built-in/LKM module
-            s
         Returns:
             The raw taints string.
 
