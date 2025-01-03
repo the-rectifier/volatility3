@@ -405,10 +405,24 @@ class DEVICE_OBJECT(objects.StructType, pool.ExecutiveObject):
 
     def get_attached_devices(self) -> Generator[ObjectInterface, None, None]:
         """Enumerate the attached device's objects"""
-        device = self.AttachedDevice.dereference()
+        seen = set()
+
+        try:
+            device = self.AttachedDevice.dereference()
+        except exceptions.InvalidAddressException:
+            return
+
         while device:
+            if device.vol.offset in seen:
+                break
+            seen.add(device.vol.offset)
+
             yield device
-            device = device.AttachedDevice.dereference()
+
+            try:
+                device = device.AttachedDevice.dereference()
+            except exceptions.InvalidAddressException:
+                return
 
 
 class DRIVER_OBJECT(objects.StructType, pool.ExecutiveObject):
@@ -421,10 +435,24 @@ class DRIVER_OBJECT(objects.StructType, pool.ExecutiveObject):
 
     def get_devices(self) -> Generator[ObjectInterface, None, None]:
         """Enumerate the driver's device objects"""
-        device = self.DeviceObject.dereference()
+        seen = set()
+
+        try:
+            device = self.DeviceObject.dereference()
+        except exceptions.InvalidAddressException:
+            return
+
         while device:
+            if device.vol.offset in seen:
+                return
+            seen.add(device.vol.offset)
+
             yield device
-            device = device.NextDevice.dereference()
+
+            try:
+                device = device.NextDevice.dereference()
+            except exceptions.InvalidAddressException:
+                return
 
     def is_valid(self) -> bool:
         """Determine if the object is valid."""
@@ -519,7 +547,8 @@ class ETHREAD(objects.StructType, pool.ExecutiveObject):
                 if not isinstance(ctime, datetime.datetime):
                     return False
 
-                if not (1998 < ctime.year < 2030):
+                current_year = datetime.datetime.now().year
+                if not (1998 < ctime.year < current_year + 10):
                     return False
 
         except exceptions.InvalidAddressException:

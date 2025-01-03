@@ -219,7 +219,13 @@ class _TCP_ENDPOINT(_TCP_LISTENER):
             return None
 
     def is_valid(self):
-        if self.State not in self.State.choices.values():
+        # netstat calls this before validating the object itself
+        try:
+            state = self.State
+        except exceptions.InvalidAddressException:
+            return False
+
+        if state not in state.choices.values():
             vollog.debug(
                 f"{type(self)} 0x{self.vol.offset:x} invalid due to invalid tcp state {self.State}"
             )
