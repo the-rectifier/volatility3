@@ -149,7 +149,7 @@ class ABCKmsg(ABC):
         #   This might seem insignificant but it could cause some issues
         #   when compared with userland tool results or when used in
         #   timelines.
-        return f"{nsec / 1000000000}.{(nsec % 1000000000) / 1000:06}"
+        return f"{nsec // 1000000000}.{(nsec % 1000000000) // 1000:06}"
 
     def get_timestamp_in_sec_str(self, obj) -> str:
         # obj could be log, printk_log or printk_info
