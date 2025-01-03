@@ -14,7 +14,7 @@ class Tainting(LinuxUtilityInterface):
     """
 
     _version = (1, 0, 0)
-    _required_framework_version = (2, 14, 0)
+    _required_framework_version = (2, 16, 0)
 
     framework.require_interface_version(*_required_framework_version)
 
