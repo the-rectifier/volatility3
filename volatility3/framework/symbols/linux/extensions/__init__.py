@@ -324,9 +324,11 @@ class task_struct(generic.GenericIntelProcess):
             raise TypeError(
                 "Parent layer is not a translation layer, unable to construct process layer"
             )
-        dtb, layer_name = parent_layer.translate(pgd)
-        if not dtb:
+        try:
+            dtb, layer_name = parent_layer.translate(pgd)
+        except exceptions.InvalidAddressException:
             return None
+
         if preferred_name is None:
             preferred_name = self.vol.layer_name + f"_Process{self.pid}"
         # Add the constructed layer and return the name
