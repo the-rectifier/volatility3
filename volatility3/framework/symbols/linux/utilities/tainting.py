@@ -1,11 +1,10 @@
 from volatility3 import framework
 from volatility3.framework import interfaces
-from volatility3.framework.symbols.linux.utilities import LinuxUtilityInterface
 from volatility3.framework.constants import linux as linux_constants
 from typing import List, Optional
 
 
-class Tainting(LinuxUtilityInterface):
+class Tainting(interfaces.configuration.VersionableInterface):
     """Tainted kernel and modules parsing capabilities.
 
     Relevant Linux kernel functions:
@@ -14,7 +13,7 @@ class Tainting(LinuxUtilityInterface):
     """
 
     _version = (1, 0, 0)
-    _required_framework_version = (2, 16, 0)
+    _required_framework_version = (2, 0, 0)
 
     framework.require_interface_version(*_required_framework_version)
 
