@@ -193,7 +193,7 @@ class RegistryHive(linear.LinearlyMappedLayer):
             subkeys = node_key[-1].get_subkeys()
             for subkey in subkeys:
                 # registry keys are not case sensitive so compare likewise
-                # https://learn.microsoft.com/en-gb/windows/win32/sysinfo/structure-of-the-registry
+                # https://learn.microsoft.com/en-us/windows/win32/sysinfo/structure-of-the-registry
                 if subkey.get_name().casefold() == key_array[0].casefold():
                     node_key = node_key + [subkey]
                     found_key, key_array = found_key + [key_array[0]], key_array[1:]
