@@ -2,7 +2,7 @@
 # which is available at https://www.volatilityfoundation.org/license/vsl-v1.0
 #
 import logging
-from typing import List, Dict, Set, Iterator
+from typing import List, Dict, Iterator
 from volatility3.plugins.linux import lsmod, check_modules, hidden_modules
 from volatility3.framework import interfaces
 from volatility3.framework.configuration import requirements
