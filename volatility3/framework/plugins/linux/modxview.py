@@ -38,7 +38,7 @@ class Modxview(interfaces.plugins.PluginInterface):
             requirements.PluginRequirement(
                 name="check_modules",
                 plugin=check_modules.Check_modules,
-                version=(0, 0, 0),
+                version=(1, 0, 0),
             ),
             requirements.PluginRequirement(
                 name="hidden_modules",
