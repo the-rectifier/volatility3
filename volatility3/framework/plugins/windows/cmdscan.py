@@ -67,7 +67,7 @@ class CmdScan(interfaces.plugins.PluginInterface):
 
         Args:
             conhost_proc: the process object for conhost.exe
-            size_filter: filter (keep) vads less than this size (bytes)
+            size_filter: size above which vads will not be returned
 
         Returns:
             A list of tuples of:
@@ -100,7 +100,7 @@ class CmdScan(interfaces.plugins.PluginInterface):
             kernel_layer_name: The name of the layer on which to operate
             kernel_symbol_table_name: The name of the table containing the kernel symbols
             config_path: The config path where to find symbol files
-            procs: list of process objects
+            procs: List of process objects
             max_history: An initial set of CommandHistorySize values
 
         Returns:
