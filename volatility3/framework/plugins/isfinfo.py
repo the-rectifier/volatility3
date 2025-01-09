@@ -97,7 +97,7 @@ class IsfInfo(plugins.PluginInterface):
                     if filter_item in isf_file:
                         filtered_list.append(isf_file)
 
-        if find_spec("jsonschema") and self.config["validate"]:
+        if find_spec("fastjsonschema") and self.config["validate"]:
 
             def check_valid(data):
                 return "True" if schemas.validate(data, True) else "False"
