@@ -94,11 +94,13 @@ def valid(
     if input_hash in cached_validations and use_cache:
         return True
     try:
-        import fastjsonschema
+        import jsonschema
 
         schema_key = json.dumps(schema, sort_keys=True)
         if schema_key not in validators:
-            validator = fastjsonschema.compile(schema)
+            validator_class = jsonschema.validators.validator_for(schema)
+            validator_class.check_schema(schema)
+            validator = validator_class(schema)
             validators[schema_key] = validator
     except ImportError:
         vollog.info("Dependency for validation unavailable: jsonschema")
@@ -107,10 +109,7 @@ def valid(
 
     try:
         vollog.debug("Validating JSON against schema...")
-        validators[schema_key](input)
-        import pdb
-
-        pdb.set_trace()
+        validators[schema_key].validate(input)
         cached_validations.add(input_hash)
         vollog.debug("JSON validated against schema (result cached)")
     except fastjsonschema.JsonSchemaValueException:
