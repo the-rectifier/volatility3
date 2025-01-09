@@ -112,7 +112,7 @@ def valid(
         validators[schema_key].validate(input)
         cached_validations.add(input_hash)
         vollog.debug("JSON validated against schema (result cached)")
-    except fastjsonschema.JsonSchemaValueException:
+    except jsonschema.exceptions.SchemaError:
         vollog.debug("Schema validation error", exc_info=True)
         return False
 
