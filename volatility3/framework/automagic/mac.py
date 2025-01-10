@@ -184,12 +184,12 @@ class MacIntelStacker(interfaces.automagic.StackerLayerInterface):
         for offset, banner in offset_generator:
             banner_major, banner_minor = (int(x) for x in banner[22:].split(b".")[:2])
 
-            tmp_aslr_shift = offset - cls.virtual_to_physical_address(
+            aslr_shift = offset - cls.virtual_to_physical_address(
                 version_json_address
             )
 
             major_string = context.layers[layer_name].read(
-                version_major_phys_offset + tmp_aslr_shift, 4
+                version_major_phys_offset + aslr_shift, 4
             )
             major = struct.unpack("<I", major_string)[0]
 
@@ -197,17 +197,17 @@ class MacIntelStacker(interfaces.automagic.StackerLayerInterface):
                 continue
 
             minor_string = context.layers[layer_name].read(
-                version_minor_phys_offset + tmp_aslr_shift, 4
+                version_minor_phys_offset + aslr_shift, 4
             )
             minor = struct.unpack("<I", minor_string)[0]
 
             if minor != banner_minor:
                 continue
 
-            if tmp_aslr_shift & 0xFFF != 0:
+            if aslr_shift & 0xFFF != 0:
                 continue
 
-            aslr_shift = tmp_aslr_shift & 0xFFFFFFFF
+        aslr_shift &= 0xFFFFFFFF
 
         vollog.log(constants.LOGLEVEL_VVVV, f"Mac find_aslr returned: {aslr_shift:0x}")
 
