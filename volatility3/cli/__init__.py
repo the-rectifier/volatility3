@@ -367,7 +367,7 @@ class CommandLine:
                 plugin,
                 help=plugin_list[plugin].__doc__,
                 description=plugin_list[plugin].__doc__,
-                epilog=getattr(plugin_list[plugin], "_argparse_epilog", None),
+                epilog=plugin_list[plugin].additional_description,
             )
             self.populate_requirements_argparse(plugin_parser, plugin_list[plugin])
 
