@@ -104,7 +104,7 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
 
     _required_framework_version = (2, 0, 0)
 
-    _version = (1, 0, 1)
+    _version = (1, 0, 2)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -253,6 +253,10 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
             if not root_inode.is_valid():
                 continue
 
+            if not (root_inode.i_mapping and root_inode.i_mapping.is_readable()):
+                # Retrieving data from the page cache requires a valid address space
+                continue
+
             # Inode already processed?
             if root_inode_ptr in seen_inodes:
                 continue
@@ -282,6 +286,10 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
 
                 file_inode = file_inode_ptr.dereference()
                 if not file_inode.is_valid():
+                    continue
+
+                if not (file_inode.i_mapping and file_inode.i_mapping.is_readable()):
+                    # Retrieving data from the page cache requires a valid address space
                     continue
 
                 # Inode already processed?
@@ -316,10 +324,12 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
             if self.config["find"]:
                 if inode_in.path == self.config["find"]:
                     inode_out = inode_in.to_user(vmlinux_layer)
+
                     yield (0, astuple(inode_out))
                     break  # Only the first match
             else:
                 inode_out = inode_in.to_user(vmlinux_layer)
+
                 yield (0, astuple(inode_out))
 
     def generate_timeline(self):
@@ -389,7 +399,7 @@ class InodePages(plugins.PluginInterface):
 
     _required_framework_version = (2, 0, 0)
 
-    _version = (2, 0, 0)
+    _version = (2, 0, 1)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:

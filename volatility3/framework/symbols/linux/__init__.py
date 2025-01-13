@@ -838,11 +838,12 @@ class PageCache:
         Yields:
             Page objects
         """
-
+        layer = self.vmlinux.context.layers[self.vmlinux.layer_name]
         for page_addr in self._idstorage.get_entries(self._page_cache.i_pages):
             if not page_addr:
                 continue
 
-            page = self.vmlinux.object("page", offset=page_addr, absolute=True)
-            if page:
-                yield page
+            if not layer.is_valid(page_addr):
+                continue
+
+            yield self.vmlinux.object("page", offset=page_addr, absolute=True)
