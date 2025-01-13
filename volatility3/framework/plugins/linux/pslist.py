@@ -34,7 +34,7 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
     """Lists the processes present in a particular linux memory image."""
 
     _required_framework_version = (2, 13, 0)
-    _version = (4, 0, 0)
+    _version = (4, 1, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
@@ -250,6 +250,9 @@ class PsList(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
 
         # Note that the init_task itself is not yielded, since "ps" also never shows it.
         for task in init_task.tasks:
+            if not task.is_valid():
+                continue
+
             if filter_func(task):
                 continue
 
