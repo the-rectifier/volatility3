@@ -469,6 +469,8 @@ class InodePages(plugins.PluginInterface):
                             inode_size,
                             page_idx,
                         )
+                        continue
+
                     f.seek(current_fp)
                     f.write(page_bytes)
 
