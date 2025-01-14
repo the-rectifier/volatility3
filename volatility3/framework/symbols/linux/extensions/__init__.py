@@ -313,7 +313,7 @@ class task_struct(generic.GenericIntelProcess):
         if not layer.is_valid(self.vol.offset, self.vol.size):
             return False
 
-        if self.pid < 0:
+        if self.pid < 0 or self.tgid < 0:
             return False
 
         if self.has_member("signal") and not (
