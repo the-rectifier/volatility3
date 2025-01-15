@@ -2534,6 +2534,15 @@ class address_space(objects.StructType):
 
 
 class page(objects.StructType):
+    def is_valid(self) -> bool:
+        if self.mapping and not self.mapping.is_readable():
+            return False
+
+        if self.to_paddr() < 0:
+            return False
+
+        return True
+
     @functools.cached_property
     def pageflags_enum(self) -> Dict:
         """Returns 'pageflags' enumeration key/values

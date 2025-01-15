@@ -520,7 +520,11 @@ class InodePages(plugins.PluginInterface):
             page_mapping_addr = page_obj.mapping
             page_index = int(page_obj.index)
             page_file_offset = page_index * vmlinux_layer.page_size
-            dump_safe = page_file_offset < inode_size
+            dump_safe = (
+                page_file_offset < inode_size
+                and page_mapping_addr
+                and page_mapping_addr.is_readable()
+            )
             page_flags_list = page_obj.get_flags_list()
             page_flags = ",".join([x.replace("PG_", "") for x in page_flags_list])
             fields = (

@@ -3,6 +3,7 @@
 #
 import math
 import contextlib
+import logging
 from abc import ABC, abstractmethod
 from typing import Iterator, List, Tuple, Optional, Union
 
@@ -11,6 +12,8 @@ from volatility3.framework import constants, exceptions, interfaces, objects
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import intermed
 from volatility3.framework.symbols.linux import extensions
+
+vollog = logging.getLogger(__name__)
 
 
 class LinuxKernelIntermedSymbols(intermed.IntermediateSymbolTable):
@@ -612,7 +615,7 @@ class IDStorage(ABC):
         raise NotImplementedError
 
     def nodep_to_node(self, nodep) -> interfaces.objects.ObjectInterface:
-        """Instanciates a tree node from its pointer
+        """Instantiates a tree node from its pointer
 
         Args:
             nodep: Pointer to the XArray/RadixTree node
@@ -846,4 +849,11 @@ class PageCache:
             if not layer.is_valid(page_addr):
                 continue
 
-            yield self.vmlinux.object("page", offset=page_addr, absolute=True)
+            page = self.vmlinux.object("page", offset=page_addr, absolute=True)
+            if not page.is_valid():
+                vollog.error(
+                    f"Invalid cached page at {page.vol.offset:#x}, aborting",
+                )
+                break
+
+            yield page
