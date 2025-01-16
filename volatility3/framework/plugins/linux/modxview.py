@@ -19,7 +19,7 @@ class Modxview(interfaces.plugins.PluginInterface):
     spot modules presence and taints."""
 
     _version = (1, 0, 0)
-    _required_framework_version = (2, 18, 0)
+    _required_framework_version = (2, 17, 0)
 
     @classmethod
     def get_requirements(cls) -> List[interfaces.configuration.RequirementInterface]:
