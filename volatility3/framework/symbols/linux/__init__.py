@@ -861,17 +861,15 @@ class PageCache:
         """
         layer = self.vmlinux.context.layers[self.vmlinux.layer_name]
         for page_addr in self._idstorage.get_entries(self._page_cache.i_pages):
-            if not page_addr:
-                continue
-
             if not layer.is_valid(page_addr):
-                continue
+                error_msg = f"Invalid cached page address at {page_addr:#x}, aborting"
+                vollog.error(error_msg)
+                raise exceptions.LinuxPageCacheException(error_msg)
 
             page = self.vmlinux.object("page", offset=page_addr, absolute=True)
             if not page.is_valid():
-                vollog.error(
-                    f"Invalid cached page at {page.vol.offset:#x}, aborting",
-                )
-                break
+                error_msg = f"Invalid cached page at {page_addr:#x}, aborting"
+                vollog.error(error_msg)
+                raise exceptions.LinuxPageCacheException(error_msg)
 
             yield page

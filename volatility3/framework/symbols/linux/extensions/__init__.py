@@ -2513,6 +2513,11 @@ class inode(objects.StructType):
             page_content (bytes): The page content
         """
         for page_obj in self.get_pages():
+            if page_obj.mapping != self.i_mapping:
+                vollog.warning(
+                    f"Cached page at {page_obj.vol.offset:#x} has a mismatched address space with the inode. Skipping page"
+                )
+                continue
             page_index = int(page_obj.index)
             page_content = page_obj.get_content()
             if page_content:
@@ -2524,7 +2529,7 @@ class address_space(objects.StructType):
     def i_pages(self):
         """Returns the appropriate member containing the page cache tree"""
         if self.has_member("i_pages"):
-            # Kernel >= 4.17
+            # Kernel >= 4.17 b93b016313b3ba8003c3b8bb71f569af91f19fc7
             return self.member("i_pages")
         elif self.has_member("page_tree"):
             # Kernel < 4.17
