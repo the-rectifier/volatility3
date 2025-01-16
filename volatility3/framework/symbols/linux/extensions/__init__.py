@@ -19,7 +19,6 @@ from volatility3.framework.layers import linear, intel
 from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
 from volatility3.framework.symbols.linux.extensions import elf
-from volatility3.framework.symbols.linux.utilities import tainting
 
 vollog = logging.getLogger(__name__)
 
@@ -278,30 +277,6 @@ class module(generic.GenericIntelProcess):
                 return sym_name
 
         return None
-
-    def get_taints_as_plain_string(self) -> str:
-        """Convert the module's taints value to a 1-1 character mapping.
-        Convenient wrapper around framework's Tainting capabilities.
-
-        Returns:
-            The raw taints string.
-        """
-        return tainting.Tainting(
-            self._context,
-            linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
-        ).get_taints_as_plain_string(self.taints, True)
-
-    def get_taints_parsed(self) -> List[str]:
-        """Convert the module's taints string to a 1-1 descriptor mapping.
-        Convenient wrapper around framework's Tainting capabilities.
-
-        Returns:
-            A comprehensive (user-friendly) taint descriptor list.
-        """
-        return tainting.Tainting(
-            self._context,
-            linux.LinuxUtilities.get_module_from_volobj_type(self._context, self).name,
-        ).get_taints_parsed(self.taints, True)
 
     @property
     def section_symtab(self):

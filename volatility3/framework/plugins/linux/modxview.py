@@ -140,9 +140,21 @@ class Modxview(interfaces.plugins.PluginInterface):
                 seen_addresses.add(module.vol.offset)
 
                 if self.config.get("plain_taints"):
-                    taints = module.get_taints_as_plain_string()
+                    taints = tainting.Tainting.get_taints_as_plain_string(
+                        self.context,
+                        kernel_name,
+                        module.taints,
+                        True,
+                    )
                 else:
-                    taints = ",".join(module.get_taints_parsed())
+                    taints = ",".join(
+                        tainting.Tainting.get_taints_parsed(
+                            self.context,
+                            kernel_name,
+                            module.taints,
+                            True,
+                        )
+                    )
 
                 yield (
                     0,
