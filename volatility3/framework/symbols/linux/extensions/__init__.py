@@ -307,6 +307,46 @@ class module(generic.GenericIntelProcess):
 
 
 class task_struct(generic.GenericIntelProcess):
+    def is_valid(self) -> bool:
+        layer = self._context.layers[self.vol.layer_name]
+        # Make sure the entire task content is readable
+        if not layer.is_valid(self.vol.offset, self.vol.size):
+            return False
+
+        if self.pid < 0 or self.tgid < 0:
+            return False
+
+        if self.has_member("signal") and not (
+            self.signal and self.signal.is_readable()
+        ):
+            return False
+
+        if self.has_member("nsproxy") and not (
+            self.nsproxy and self.nsproxy.is_readable()
+        ):
+            return False
+
+        if self.has_member("real_parent") and not (
+            self.real_parent and self.real_parent.is_readable()
+        ):
+            return False
+
+        if (
+            self.has_member("active_mm")
+            and self.active_mm
+            and not self.active_mm.is_readable()
+        ):
+            return False
+
+        if self.mm:
+            if not self.mm.is_readable():
+                return False
+
+            if self.mm != self.active_mm:
+                return False
+
+        return True
+
     def add_process_layer(
         self, config_prefix: Optional[str] = None, preferred_name: Optional[str] = None
     ) -> Optional[str]:
@@ -401,6 +441,8 @@ class task_struct(generic.GenericIntelProcess):
         tasks_iterable = self._get_tasks_iterable()
         threads_seen = set([self.vol.offset])
         for task in tasks_iterable:
+            if not task.is_valid():
+                continue
             if task.vol.offset not in threads_seen:
                 threads_seen.add(task.vol.offset)
                 yield task
