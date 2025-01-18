@@ -306,6 +306,46 @@ class module(generic.GenericIntelProcess):
 
 
 class task_struct(generic.GenericIntelProcess):
+    def is_valid(self) -> bool:
+        layer = self._context.layers[self.vol.layer_name]
+        # Make sure the entire task content is readable
+        if not layer.is_valid(self.vol.offset, self.vol.size):
+            return False
+
+        if self.pid < 0 or self.tgid < 0:
+            return False
+
+        if self.has_member("signal") and not (
+            self.signal and self.signal.is_readable()
+        ):
+            return False
+
+        if self.has_member("nsproxy") and not (
+            self.nsproxy and self.nsproxy.is_readable()
+        ):
+            return False
+
+        if self.has_member("real_parent") and not (
+            self.real_parent and self.real_parent.is_readable()
+        ):
+            return False
+
+        if (
+            self.has_member("active_mm")
+            and self.active_mm
+            and not self.active_mm.is_readable()
+        ):
+            return False
+
+        if self.mm:
+            if not self.mm.is_readable():
+                return False
+
+            if self.mm != self.active_mm:
+                return False
+
+        return True
+
     def add_process_layer(
         self, config_prefix: Optional[str] = None, preferred_name: Optional[str] = None
     ) -> Optional[str]:
@@ -323,9 +363,11 @@ class task_struct(generic.GenericIntelProcess):
             raise TypeError(
                 "Parent layer is not a translation layer, unable to construct process layer"
             )
-        dtb, layer_name = parent_layer.translate(pgd)
-        if not dtb:
+        try:
+            dtb, layer_name = parent_layer.translate(pgd)
+        except exceptions.InvalidAddressException:
             return None
+
         if preferred_name is None:
             preferred_name = self.vol.layer_name + f"_Process{self.pid}"
         # Add the constructed layer and return the name
@@ -398,6 +440,8 @@ class task_struct(generic.GenericIntelProcess):
         tasks_iterable = self._get_tasks_iterable()
         threads_seen = set([self.vol.offset])
         for task in tasks_iterable:
+            if not task.is_valid():
+                continue
             if task.vol.offset not in threads_seen:
                 threads_seen.add(task.vol.offset)
                 yield task
@@ -808,23 +852,30 @@ class mm_struct(objects.StructType):
     def _get_mmap_iter(self) -> Iterable[interfaces.objects.ObjectInterface]:
         """Returns an iterator for the mmap list member of an mm_struct. Use this only if
         required, get_vma_iter() will choose the correct _get_maple_tree_iter() or
-        _get_mmap_iter() automatically as required."""
+        _get_mmap_iter() automatically as required.
+
+        Yields:
+            vm_area_struct objects
+        """
 
         if not self.has_member("mmap"):
             raise AttributeError(
                 "_get_mmap_iter called on mm_struct where no mmap member exists."
             )
-        if not self.mmap:
+        vma_pointer = self.mmap
+        if not (vma_pointer and vma_pointer.is_readable()):
             return None
-        yield self.mmap
+        vma_object = vma_pointer.dereference()
+        yield vma_object
 
-        seen = {self.mmap.vol.offset}
-        link = self.mmap.vm_next
+        seen = {vma_pointer}
+        vma_pointer = vma_pointer.vm_next
 
-        while link != 0 and link.vol.offset not in seen:
-            yield link
-            seen.add(link.vol.offset)
-            link = link.vm_next
+        while vma_pointer and vma_pointer.is_readable() and vma_pointer not in seen:
+            vma_object = vma_pointer.dereference()
+            yield vma_object
+            seen.add(vma_pointer)
+            vma_pointer = vma_pointer.vm_next
 
     # TODO: As of version 3.0.0 this method should be removed
     def get_maple_tree_iter(self) -> Iterable[interfaces.objects.ObjectInterface]:
@@ -839,7 +890,11 @@ class mm_struct(objects.StructType):
     def _get_maple_tree_iter(self) -> Iterable[interfaces.objects.ObjectInterface]:
         """Returns an iterator for the mm_mt member of an mm_struct. Use this only if
         required, get_vma_iter() will choose the correct _get_maple_tree_iter() or
-        get_mmap_iter() automatically as required."""
+        get_mmap_iter() automatically as required.
+
+        Yields:
+            vm_area_struct objects
+        """
 
         if not self.has_member("mm_mt"):
             raise AttributeError(
@@ -847,20 +902,27 @@ class mm_struct(objects.StructType):
             )
         symbol_table_name = self.get_symbol_table_name()
         for vma_pointer in self.mm_mt.get_slot_iter():
-            # convert pointer to vm_area_struct and yield
-            vma = self._context.object(
+            # Convert pointer to vm_area_struct and yield
+            vma_object = self._context.object(
                 symbol_table_name + constants.BANG + "vm_area_struct",
                 layer_name=self.vol.native_layer_name,
                 offset=vma_pointer,
             )
-            yield vma
+            yield vma_object
 
     def get_vma_iter(self) -> Iterable[interfaces.objects.ObjectInterface]:
-        """Returns an iterator for the VMAs in an mm_struct. Automatically choosing the mmap or mm_mt as required."""
+        """Returns an iterator for the VMAs in an mm_struct.
+        Automatically choosing the mmap or mm_mt as required.
+
+        Yields:
+            vm_area_struct objects
+        """
 
         if self.has_member("mmap"):
+            # kernels < 6.1
             yield from self._get_mmap_iter()
         elif self.has_member("mm_mt"):
+            # kernels >= 6.1 d4af56c5c7c6781ca6ca8075e2cf5bc119ed33d1
             yield from self._get_maple_tree_iter()
         else:
             raise AttributeError("Unable to find mmap or mm_mt in mm_struct")
@@ -1206,35 +1268,43 @@ class list_head(objects.StructType, collections.abc.Iterable):
             Objects of the type specified via the "symbol_type" argument.
 
         """
-        layer = layer or self.vol.layer_name
+        layer_name = layer or self.vol.layer_name
+
+        trans_layer = self._context.layers[layer_name]
+        if not trans_layer.is_valid(self.vol.offset):
+            return None
 
         relative_offset = self._context.symbol_space.get_type(
             symbol_type
         ).relative_child_offset(member)
 
-        direction = "prev"
-        if forward:
-            direction = "next"
-        try:
-            link = getattr(self, direction).dereference()
-        except exceptions.InvalidAddressException:
+        direction = "next" if forward else "prev"
+
+        link_ptr = getattr(self, direction)
+        if not (link_ptr and link_ptr.is_readable()):
             return None
+        link = link_ptr.dereference()
+
         if not sentinel:
-            yield self._context.object(
-                symbol_type, layer, offset=self.vol.offset - relative_offset
-            )
+            obj_offset = self.vol.offset - relative_offset
+            if not trans_layer.is_valid(obj_offset):
+                return None
+
+            yield self._context.object(symbol_type, layer_name, offset=obj_offset)
+
         seen = {self.vol.offset}
         while link.vol.offset not in seen:
-            obj = self._context.object(
-                symbol_type, layer, offset=link.vol.offset - relative_offset
-            )
-            yield obj
+            obj_offset = link.vol.offset - relative_offset
+            if not trans_layer.is_valid(obj_offset):
+                return None
+
+            yield self._context.object(symbol_type, layer_name, offset=obj_offset)
 
             seen.add(link.vol.offset)
-            try:
-                link = getattr(link, direction).dereference()
-            except exceptions.InvalidAddressException:
+            link_ptr = getattr(link, direction)
+            if not (link_ptr and link_ptr.is_readable()):
                 break
+            link = link_ptr.dereference()
 
     def __iter__(self) -> Iterator[interfaces.objects.ObjectInterface]:
         return self.to_list(self.vol.parent.vol.type_name, self.vol.member_name)
