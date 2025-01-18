@@ -303,8 +303,8 @@ class ModuleInterface(interfaces.configuration.ConfigurableInterface):
         """Determines whether an enumeration is present in the module's symbol table."""
 
     @abstractmethod
-    def symbols(self) -> List:
-        """Lists the symbols contained in the symbol table for this module"""
+    def symbols(self) -> Iterable[str]:
+        """Returns an iterable of the symbols contained in the symbol table for this module"""
 
     @abstractmethod
     def get_symbols_by_absolute_location(self, offset: int, size: int = 0) -> List[str]:
