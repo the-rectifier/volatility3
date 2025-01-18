@@ -20,7 +20,6 @@ from volatility3.framework.objects import utility
 from volatility3.framework.symbols import generic, linux, intermed
 from volatility3.framework.symbols.linux.extensions import elf
 
-
 vollog = logging.getLogger(__name__)
 
 # Keep these in a basic module, to prevent import cycles when symbol providers require them
