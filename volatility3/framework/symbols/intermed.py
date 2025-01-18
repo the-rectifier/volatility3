@@ -422,8 +422,12 @@ class Version1Format(ISFormatTable):
     @property
     def types(self) -> Iterable[str]:
         """Returns an iterable (KeysView) of the available symbol type names."""
-        # self.natives.types (set) is generally very small compared to user_types,
-        # so the dict conversion overhead can be neglected
+        # We use ** instead of
+        # `set(self._json_object.get("user_types", {}).keys()).union(self.natives.types)`
+        # because converting user_types dict to a set is costly.
+        # It is more efficient to convert the (very small) self.natives.types set to a dict.
+        # FIXME: On Python3.8 support drop, merge the two dicts using the merge operator:
+        # (self._json_object.get("user_types", {}) | dict.fromkeys(self.natives.types)).keys()
         return {
             **self._json_object.get("user_types", {}),
             **dict.fromkeys(self.natives.types),
