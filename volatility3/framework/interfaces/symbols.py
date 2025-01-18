@@ -375,7 +375,13 @@ class NativeTableInterface(BaseSymbolTableInterface):
         )
 
     @property
-    def enumerations(self) -> Iterable[str]:
+    def enumerations(self) -> Iterable[Any]:
+        """Returns an iterable of the available enumerations."""
+        return []
+
+    @property
+    def types(self) -> Iterable[str]:
+        """Returns an iterable of the available symbol type names."""
         return []
 
 
