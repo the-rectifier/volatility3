@@ -117,9 +117,7 @@ class Tainting(interfaces.configuration.VersionableInterface):
             return cls._module_flags_taint_post_4_10_rc1(
                 context, kernel_module_name, taints, is_module
             )
-        return cls._module_flags_taint_pre_4_10_rc1(
-            context, kernel_module_name, taints, is_module
-        )
+        return cls._module_flags_taint_pre_4_10_rc1(taints, is_module)
 
     @classmethod
     def get_taints_parsed(
