@@ -420,7 +420,7 @@ class Version1Format(ISFormatTable):
         return self._json_object.get("enums", {}).keys()
 
     @property
-    def types(self):
+    def types(self) -> Iterable[str]:
         """Returns an iterable (KeysView) of the available symbol type names."""
         # self.natives.types (set) is generally very small compared to user_types,
         # so the dict conversion overhead can be neglected
