@@ -136,7 +136,7 @@ class Modxview(interfaces.plugins.PluginInterface):
             for module in run_results[plugin_name]:
                 # Use offsets as unique keys, whether a module
                 # appears in many plugin runs or not
-                if aggregated_modules.get(module.vol.offset):
+                if aggregated_modules.get(module.vol.offset, None) is not None:
                     # Append the plugin to the list of originating plugins
                     aggregated_modules[module.vol.offset][1].append(plugin_name)
                 else:
