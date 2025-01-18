@@ -30,7 +30,7 @@ class Tainting(interfaces.configuration.VersionableInterface):
         in-memory or not.
 
         Returns:
-            A list of "taint_flag" kernel objects if taint_flags symbok exists
+            A list of "taint_flag" kernel objects if taint_flags symbol exists
         """
         kernel = context.modules[kernel_module_name]
         if kernel.has_symbol("taint_flags"):
