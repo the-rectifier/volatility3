@@ -149,7 +149,7 @@ class BaseSymbolTableInterface:
 
     @property
     def enumerations(self) -> Iterable[Any]:
-        """Returns an iterable of the available enumerations names."""
+        """Returns an iterable of the available enumerations."""
         raise NotImplementedError(
             "Abstract property enumerations not implemented by subclass."
         )
