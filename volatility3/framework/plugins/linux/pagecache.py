@@ -147,7 +147,13 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
             Otherwise, it returns the same symlink_path
         """
         # i_link (fast symlinks) were introduced in 4.2
-        if inode and inode.is_link and inode.has_member("i_link") and inode.i_link:
+        if (
+            inode
+            and inode.is_link
+            and inode.has_member("i_link")
+            and inode.i_link
+            and inode.i_link.is_readable()
+        ):
             i_link_str = inode.i_link.dereference().cast(
                 "string", max_length=255, encoding="utf-8", errors="replace"
             )
