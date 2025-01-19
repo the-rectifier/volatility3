@@ -389,6 +389,7 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
             ("ModificationTime", datetime.datetime),
             ("ChangeTime", datetime.datetime),
             ("FilePath", str),
+            ("InodeSize", int),
         ]
 
         return renderers.TreeGrid(
