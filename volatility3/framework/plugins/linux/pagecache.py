@@ -473,7 +473,7 @@ class InodePages(plugins.PluginInterface):
             context: The context on which to operate
             layer_name: The name of the layer on which to operate
             inode: The inode to dump
-            stream: An IO steam to write to, typically FileHandlerInterface or BytesIO
+            stream: An IO stream to write to, typically FileHandlerInterface or BytesIO
         """
         layer = context.layers[layer_name]
         # By using truncate/seek, provided the filesystem supports it, and the
