@@ -215,7 +215,7 @@ def _get_datetime_str_value(
 
 
 class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
-    """Scans for windows services."""
+    """Extract information on executed applications from the AmCache."""
 
     _required_framework_version = (2, 0, 0)
     _version = (1, 0, 0)
@@ -543,7 +543,7 @@ class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                     amcache.get_key("Root\\InventoryDriverBinary")  # type: ignore
                 )
             )
-        except KeyError:
+        except (KeyError, registry.RegistryFormatException):
             # Registry key not found
             pass
 
@@ -554,7 +554,7 @@ class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                     amcache.get_key("Root\\Programs")
                 )  # type: ignore
             }
-        except KeyError:
+        except (KeyError, registry.RegistryFormatException):
             programs = {}
 
         try:
@@ -564,7 +564,7 @@ class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                 ),
                 key=_entry_sort_key,
             )
-        except KeyError:
+        except (KeyError, registry.RegistryFormatException):
             files = []
 
         for program_id, file_entries in itertools.groupby(
@@ -593,7 +593,7 @@ class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                     amcache.get_key("Root\\InventoryApplication")  # type: ignore
                 )
             )
-        except KeyError:
+        except (KeyError, registry.RegistryFormatException):
             programs = {}
 
         try:
@@ -603,7 +603,7 @@ class Amcache(interfaces.plugins.PluginInterface, timeliner.TimeLinerInterface):
                 ),
                 key=_entry_sort_key,
             )
-        except KeyError:
+        except (KeyError, registry.RegistryFormatException):
             files = []
 
         for program_id, file_entries in itertools.groupby(
