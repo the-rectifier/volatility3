@@ -468,7 +468,7 @@ class InodePages(plugins.PluginInterface):
 
         Args:
             inode: The inode to dump
-            stream: A IO steam to write to, typically FileHandlerInterface or BytesIO
+            stream: An IO steam to write to, typically FileHandlerInterface or BytesIO
             vmlinux_layer: The kernel layer to obtain the page size
         """
 
