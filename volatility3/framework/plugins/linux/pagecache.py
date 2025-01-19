@@ -38,6 +38,11 @@ class InodeUser:
     modification_time: str
     change_time: str
     path: str
+    inode_size: int
+
+    @staticmethod
+    def format_symlink(symlink_source: str, symlink_dest: str):
+        return f"{symlink_source} -> {symlink_dest}"
 
 
 @dataclass
@@ -81,6 +86,7 @@ class InodeInternal:
         access_time_dt = self.inode.get_access_time()
         modification_time_dt = self.inode.get_modification_time()
         change_time_dt = self.inode.get_change_time()
+        inode_size = int(self.inode.i_size)
 
         inode_user = InodeUser(
             superblock_addr=superblock_addr,
@@ -96,6 +102,7 @@ class InodeInternal:
             modification_time=modification_time_dt,
             change_time=change_time_dt,
             path=self.path,
+            inode_size=inode_size,
         )
         return inode_user
 
