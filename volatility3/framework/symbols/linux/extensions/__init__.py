@@ -2948,7 +2948,7 @@ class scatterlist(objects.StructType):
         Returns:
             An iterator of bytes
         """
-        # Either "physical" is layer-1 because this is a module layer, either "physical" is the current layer
+        # Either "physical" is layer-1 because this is a module layer, or "physical" is the current layer
         physical_layer_name = self._context.layers[self.vol.layer_name].config.get(
             "memory_layer", self.vol.layer_name
         )
