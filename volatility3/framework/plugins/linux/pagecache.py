@@ -41,7 +41,7 @@ class InodeUser:
     inode_size: int
 
     @staticmethod
-    def format_symlink(symlink_source: str, symlink_dest: str):
+    def format_symlink(symlink_source: str, symlink_dest: str) -> str:
         return f"{symlink_source} -> {symlink_dest}"
 
 
