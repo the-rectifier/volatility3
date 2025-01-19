@@ -156,10 +156,10 @@ class Files(plugins.PluginInterface, timeliner.TimeLinerInterface):
         """
         # i_link (fast symlinks) were introduced in 4.2
         if inode and inode.is_link and inode.has_member("i_link") and inode.i_link:
-            i_link_str = inode.i_link.dereference().cast(
+            symlink_dest = inode.i_link.dereference().cast(
                 "string", max_length=255, encoding="utf-8", errors="replace"
             )
-            symlink_path = f"{symlink_path} -> {i_link_str}"
+            symlink_path = InodeUser.format_symlink(symlink_path, symlink_dest)
 
         return symlink_path
 
