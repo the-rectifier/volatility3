@@ -511,7 +511,7 @@ class InodePages(plugins.PluginInterface):
                 page_vaddr = page_obj.vol.offset
                 page_paddr = page_obj.to_paddr()
                 page_mapping_addr = page_obj.mapping
-                page_index = int(page_obj.index)
+                page_index = page_obj.index
                 page_file_offset = page_index * vmlinux_layer.page_size
                 dump_safe = (
                     page_file_offset < inode_size
