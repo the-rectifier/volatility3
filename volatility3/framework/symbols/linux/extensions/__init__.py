@@ -2556,7 +2556,12 @@ class inode(objects.StructType):
         """
         if not self.i_size:
             return
-        elif not (self.i_mapping and self.i_mapping.nrpages > 0):
+
+        if not (
+            self.i_mapping
+            and self.i_mapping.is_readable()
+            and self.i_mapping.nrpages > 0
+        ):
             return
 
         page_cache = linux.PageCache(
@@ -2564,19 +2569,26 @@ class inode(objects.StructType):
             kernel_module_name="kernel",
             page_cache=self.i_mapping.dereference(),
         )
+
         yield from page_cache.get_cached_pages()
 
-    def get_contents(self):
+    def get_contents(self) -> Iterable[Tuple[int, bytes]]:
         """Get the inode cached pages from the page cache
 
         Yields:
             page_index (int): The page index in the Tree. File offset is page_index * PAGE_SIZE.
-            page_content (str): The page content
+            page_content (bytes): The page content
         """
         for page_obj in self.get_pages():
+            if page_obj.mapping != self.i_mapping:
+                vollog.warning(
+                    f"Cached page at {page_obj.vol.offset:#x} has a mismatched address space with the inode. Skipping page"
+                )
+                continue
             page_index = int(page_obj.index)
             page_content = page_obj.get_content()
-            yield page_index, page_content
+            if page_content:
+                yield page_index, page_content
 
 
 class address_space(objects.StructType):
@@ -2584,7 +2596,7 @@ class address_space(objects.StructType):
     def i_pages(self):
         """Returns the appropriate member containing the page cache tree"""
         if self.has_member("i_pages"):
-            # Kernel >= 4.17
+            # Kernel >= 4.17 b93b016313b3ba8003c3b8bb71f569af91f19fc7
             return self.member("i_pages")
         elif self.has_member("page_tree"):
             # Kernel < 4.17
@@ -2594,6 +2606,15 @@ class address_space(objects.StructType):
 
 
 class page(objects.StructType):
+    def is_valid(self) -> bool:
+        if self.mapping and not self.mapping.is_readable():
+            return False
+
+        if self.to_paddr() < 0:
+            return False
+
+        return True
+
     @functools.cached_property
     def pageflags_enum(self) -> Dict:
         """Returns 'pageflags' enumeration key/values
@@ -2692,7 +2713,7 @@ class page(objects.StructType):
 
         return page_paddr
 
-    def get_content(self) -> Union[str, None]:
+    def get_content(self) -> Union[bytes, None]:
         """Returns the page content
 
         Returns:
@@ -2708,8 +2729,13 @@ class page(objects.StructType):
         if not page_paddr:
             return None
 
-        page_data = physical_layer.read(page_paddr, vmlinux_layer.page_size)
-        return page_data
+        if not physical_layer.is_valid(page_paddr, length=vmlinux_layer.page_size):
+            vollog.debug(
+                "Unable to read page 0x%x content at 0x%x", self.vol.offset, page_paddr
+            )
+            return None
+
+        return physical_layer.read(page_paddr, vmlinux_layer.page_size)
 
     def get_flags_list(self) -> List[str]:
         """Returns a list of page flags
@@ -2822,17 +2848,17 @@ class IDR(objects.StructType):
 
 
 class rb_root(objects.StructType):
-    def _walk_nodes(self, root_node) -> Iterator[int]:
+    def _walk_nodes(self, root_node: int) -> Iterator[int]:
         """Traverses the Red-Black tree from the root node and yields a pointer to each
         node in this tree.
 
         Args:
-            root_node: A Red-Black tree node from which to start descending
+            root_node: A Red-Black tree node pointer from which to start descending
 
         Yields:
             A pointer to every node descending from the specified root node
         """
-        if not root_node:
+        if not (root_node and root_node.is_readable()):
             return
 
         yield root_node
