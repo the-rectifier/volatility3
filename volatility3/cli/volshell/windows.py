@@ -44,11 +44,58 @@ class Volshell(generic.Volshell):
             )
         )
 
+    def get_process(self, pid=None, v_offset=None, p_offset=None):
+        """Returns the EPROCESS object that matches the pid. If v_offset/p_offset is provided, construct the EPROCESS object at the provided address. Only one parameter is allowed."""
+
+        if sum(1 if x is not None else 0 for x in [pid, v_offset, p_offset]) != 1:
+            print("Only one parameter is accepted")
+            return None
+
+        kernel_name = self.config["kernel"]
+        kernel = self.context.modules[kernel_name]
+
+        kernel_layer_name = kernel.layer_name
+
+        kernel_layer = self.context.layers[kernel_layer_name]
+        memory_layer_name = kernel_layer.dependencies[0]
+
+        eprocess_symbol = kernel.symbol_table_name + constants.BANG + "_EPROCESS"
+
+        if v_offset is not None:
+            eproc = self.context.object(
+                eprocess_symbol,
+                layer_name=kernel_layer_name,
+                offset=v_offset,
+            )
+
+            return eproc
+
+        if p_offset is not None:
+            eproc = self.context.object(
+                eprocess_symbol,
+                layer_name=memory_layer_name,
+                offset=p_offset,
+                native_layer_name=kernel_layer_name,
+            )
+
+            return eproc
+
+        if pid is not None:
+            processes = self.list_processes()
+            for process in processes:
+                if process.UniqueProcessId == pid:
+                    return process
+            print(f"No process with process ID {pid} found")
+            return None
+
+        return None
+
     def construct_locals(self) -> List[Tuple[List[str], Any]]:
         result = super().construct_locals()
         result += [
             (["cp", "change_process"], self.change_process),
             (["lp", "list_processes", "ps"], self.list_processes),
+            (["gp", "get_process"], self.get_process),
             (["symbols"], self.context.symbol_space[self.current_symbol_table]),
         ]
         if self.config.get("pid", None) is not None:
